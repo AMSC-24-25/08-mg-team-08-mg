@@ -63,17 +63,36 @@ std::vector<std::vector<double>> PoissonSolver::compute_residual() {
 std::vector<std::vector<double>> PoissonSolver::restrict_residual(const std::vector<std::vector<double>> &fine_grid) {
     int coarse_N = (N + 1) / 2;
     std::vector<std::vector<double>> coarse_grid(coarse_N, std::vector<double>(coarse_N, 0.0));
+
     for (int i = 1; i < coarse_N - 1; ++i) {
         for (int j = 1; j < coarse_N - 1; ++j) {
-            coarse_grid[i][j] = 0.25 * (
-                fine_grid[2 * i][2 * j] +
-                0.5 * (fine_grid[2 * i - 1][2 * j] + fine_grid[2 * i + 1][2 * j]) +
-                0.5 * (fine_grid[2 * i][2 * j - 1] + fine_grid[2 * i][2 * j + 1])
+            // Central coincident node
+            double central = 0.25 * fine_grid[2 * i][2 * j];
+            
+            // North, South, East, West neighbors (cardinal directions)
+            double cardinal = 0.125 * (
+                fine_grid[2 * i - 1][2 * j] + // North
+                fine_grid[2 * i + 1][2 * j] + // South
+                fine_grid[2 * i][2 * j - 1] + // West
+                fine_grid[2 * i][2 * j + 1]   // East
             );
+
+            // Diagonal neighbors (North-East, North-West, South-East, South-West)
+            double diagonal = 0.0625 * (
+                fine_grid[2 * i - 1][2 * j - 1] + // North-West
+                fine_grid[2 * i - 1][2 * j + 1] + // North-East
+                fine_grid[2 * i + 1][2 * j - 1] + // South-West
+                fine_grid[2 * i + 1][2 * j + 1]   // South-East
+            );
+
+            // Combine contributions
+            coarse_grid[i][j] = central + cardinal + diagonal;
         }
     }
+
     return coarse_grid;
 }
+
 
 // Prolong correction to finer grid
 std::vector<std::vector<double>> PoissonSolver::prolong_correction(const std::vector<std::vector<double>> &coarse_grid) {

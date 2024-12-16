@@ -24,7 +24,7 @@ private:
     double a;                  // Scaling constant
     int max_iter;              // Maximum number of iterations
     double tolerance;          // Convergence tolerance
-    std::vector<std::vector<double>> u; // Solution grid
+    std::vector<std::vector<double>> u;   // Solution grid
     std::vector<std::vector<double>> rhs; // Right-hand side (forcing term)
 
     /**
@@ -50,10 +50,4 @@ private:
     double forcing_function(double x, double y);
 };
 
-/**
- * Perform Gauss-Seidel smoothing on the grid.
- * @param num_sweeps - Number of smoothing iterations
- */
-void gauss_seidel_smooth(int num_sweeps);
-
-#endif 
+#endif

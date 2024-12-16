@@ -7,3 +7,11 @@ $$
 u = g & \text{on } \partial \Omega.
 \end{cases}
 $$
+
+
+How to test:
+mkdir -p build
+cd build
+cmake ..
+make
+./PoissonSolver

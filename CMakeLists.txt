@@ -5,8 +5,14 @@ project(PoissonSolver LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Add source files
-add_executable(PoissonSolver
-    src/main.cpp
+# Include directories
+include_directories(include)
+
+# Source files
+set(SOURCES
     src/PoissonSolver.cpp
+    src/main.cpp
 )
+
+# Define executable
+add_executable(PoissonSolver ${SOURCES})

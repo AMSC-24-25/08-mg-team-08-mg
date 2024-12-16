@@ -1,16 +1,12 @@
 #include "PoissonSolver.h"
-#include <iostream>
-#include <iomanip>
 
 int main() {
-    int N = 11;              
-    double a = 1.0;           
-    int max_iter = 1000;      
-    double tolerance = 1e-6;  
+    int N = 21;                // Grid size
+    double a = 1.0;            // Scaling constant
+    int max_iter = 10000;      // Maximum iterations
+    double tolerance = 1e-8;   // Convergence tolerance
 
     PoissonSolver solver(N, a, max_iter, tolerance);
-
-    // Test the initialize and analytical_solution methods
     solver.solve();
 
     return 0;

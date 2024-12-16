@@ -48,6 +48,18 @@ private:
      * @return Forcing term value at (x, y)
      */
     double forcing_function(double x, double y);
+
+     /**
+     * Perform Gauss-Seidel smoothing
+     * @param num_sweeps - Number of smoothing iterations
+     */
+    void gauss_seidel_smooth(int num_sweeps);
+
+    /**
+     * Compute the residual of the current solution
+     * @return Residual grid
+     */
+    std::vector<std::vector<double>> compute_residual();
 };
 
 #endif

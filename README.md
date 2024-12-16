@@ -38,4 +38,5 @@ cd build
 cmake ..
 make
 ./PoissonSolver
+cd ..
 ```

@@ -60,6 +60,27 @@ private:
      * @return Residual grid
      */
     std::vector<std::vector<double>> compute_residual();
+
+        /**
+     * Restrict the residual to a coarser grid
+     * @param fine_grid - The finer residual grid
+     * @return Coarser residual grid
+     */
+    std::vector<std::vector<double>> restrict_residual(const std::vector<std::vector<double>> &fine_grid);
+
+    /**
+     * Prolong the correction from a coarser grid to a finer grid
+     * @param coarse_grid - The coarser correction grid
+     * @return Finer correction grid
+     */
+    std::vector<std::vector<double>> prolong_correction(const std::vector<std::vector<double>> &coarse_grid);
+
+    /**
+     * Perform a V-cycle multigrid iteration
+     */
+    void v_cycle(int level, std::vector<std::vector<double>> &u_level, 
+                 std::vector<std::vector<double>> &rhs_level, int num_levels);
+
 };
 
 #endif

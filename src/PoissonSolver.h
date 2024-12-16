@@ -8,11 +8,11 @@ public:
     /**
      * Constructor for PoissonSolver
      * @param N - Number of grid points in each dimension (N x N grid)
-     * @param alpha - Scaling constant in the equation
+     * @param a - Scaling constant in the equation
      * @param max_iter - Maximum number of iterations
      * @param tolerance - Convergence tolerance
      */
-    PoissonSolver(int N, double alpha, int max_iter, double tolerance);
+    PoissonSolver(int N, double a, int max_iter, double tolerance);
 
     /**
      * Solve the Poisson equation
@@ -21,10 +21,10 @@ public:
 
 private:
     int N;                     // Number of grid points
-    double alpha;              // Scaling constant
+    double a;                  // Scaling constant
     int max_iter;              // Maximum number of iterations
     double tolerance;          // Convergence tolerance
-    std::vector<std::vector<double>> phi; // Solution grid
+    std::vector<std::vector<double>> u; // Solution grid
     std::vector<std::vector<double>> rhs; // Right-hand side (forcing term)
 
     /**
@@ -49,5 +49,11 @@ private:
      */
     double forcing_function(double x, double y);
 };
+
+/**
+ * Perform Gauss-Seidel smoothing on the grid.
+ * @param num_sweeps - Number of smoothing iterations
+ */
+void gauss_seidel_smooth(int num_sweeps);
 
 #endif 

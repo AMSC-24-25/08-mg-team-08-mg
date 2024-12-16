@@ -4,8 +4,8 @@
 #include <iomanip> 
 
 /// Constructor
-PoissonSolver::PoissonSolver(int N, double a, int max_iter, double tolerance)
-    : N(N), a(a), max_iter(max_iter), tolerance(tolerance) {
+PoissonSolver::PoissonSolver(int N, double a, int max_iter, double tolerance, int levels)
+    : N(N), a(a), max_iter(max_iter), tolerance(tolerance), levels(levels) {
     u = std::vector<std::vector<double>>(N, std::vector<double>(N, 0.0));
     rhs = std::vector<std::vector<double>>(N, std::vector<double>(N, 0.0));
 }
@@ -162,7 +162,7 @@ void PoissonSolver::solve() {
     while (iter < max_iter && error > tolerance) {
         // Perform one V-cycle
         // v_cycle(0, u, rhs, std::log2(N - 1));
-        v_cycle(0, u, rhs, 3);
+        v_cycle(0, u, rhs, levels);
 
         // Compute residual and calculate error
         auto residual = compute_residual();

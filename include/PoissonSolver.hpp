@@ -11,8 +11,9 @@ public:
      * @param a - Scaling constant in the equation
      * @param max_iter - Maximum number of iterations
      * @param tolerance - Convergence tolerance
+     * @param levels - number of levels to coarsen
      */
-    PoissonSolver(int N, double a, int max_iter, double tolerance);
+    PoissonSolver(int N, double a, int max_iter, double tolerance, int levels);
     
     /**
      * Solve the Poisson equation
@@ -25,6 +26,7 @@ private:
     double a;                  // Scaling constant
     int max_iter;              // Maximum number of iterations
     double tolerance;          // Convergence tolerance
+    int levels;
     std::vector<std::vector<double>> u;   // Solution grid
     std::vector<std::vector<double>> rhs; // Right-hand side (forcing term)
 

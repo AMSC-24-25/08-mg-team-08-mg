@@ -3,18 +3,19 @@
 #include <iostream>
 
 int main() {
-    int N = 65;                // Grid size
+    int N = 65;                 // Grid size
     double a = 1.0;             // Scaling constant
     int max_iter = 10000;       // Maximum iterations
     double tolerance = 1e-10;   // Convergence tolerance
+    int levels = 3;              // number of coarsening levels
 
     // Run the plain Gauss-Seidel solver
-    PoissonSolver plainSolver(N, a, max_iter, tolerance);
+    PoissonSolver plainSolver(N, a, max_iter, tolerance, levels);
     std::cout << "Running Plain Gauss-Seidel Solver...\n";
     plainSolver.solve_plain_gauss_seidel();
 
     // Run the multigrid PoissonSolver
-    PoissonSolver multigridSolver(N, a, max_iter, tolerance);
+    PoissonSolver multigridSolver(N, a, max_iter, tolerance, levels);
     std::cout << "Running Multigrid PoissonSolver...\n";
     multigridSolver.solve();
 

@@ -1,8 +1,9 @@
 # macOS
 .DS_Store
+.vscode
 
 # Build directory
-./build/
+build
 
 # Prerequisites
 *.d

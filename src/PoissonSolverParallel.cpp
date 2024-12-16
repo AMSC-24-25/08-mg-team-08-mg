@@ -137,7 +137,8 @@ void PoissonSolverParallel::solve() {
 
     while (iter < max_iter && error > tolerance) {
         // Perform one V-cycle
-        v_cycle(0, u, rhs, std::log2(N - 1));
+        // v_cycle(0, u, rhs, std::log2(N - 1));
+        v_cycle(0, u, rhs, 3);
 
         // Compute residual and error
         auto residual = compute_residual();
@@ -146,6 +147,7 @@ void PoissonSolverParallel::solve() {
         #pragma omp parallel for collapse(2) reduction(+:error) // Parallelize error computation
         for (int i = 0; i < N; ++i) {
             for (int j = 0; j < N; ++j) {
+                // Squared L-2 norm
                 error += residual[i][j] * residual[i][j];
             }
         }

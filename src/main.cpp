@@ -3,10 +3,10 @@
 #include <iostream>
 
 int main() {
-    int N = 21;                // Grid size
+    int N = 257;                // Grid size
     double a = 1.0;            // Scaling constant
     int max_iter = 10000;      // Maximum iterations
-    double tolerance = 1e-8;   // Convergence tolerance
+    double tolerance = 1e-13;   // Convergence tolerance
 
     // Run the serial PoissonSolver
     PoissonSolver solver(N, a, max_iter, tolerance);

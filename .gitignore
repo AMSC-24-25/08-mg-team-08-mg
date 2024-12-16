@@ -1,6 +1,9 @@
 # macOS
 .DS_Store
 
+# Build directory
+./build/
+
 # Prerequisites
 *.d
 
@@ -34,5 +37,3 @@
 *.out
 *.app
 
-# Build directory
-build/ 

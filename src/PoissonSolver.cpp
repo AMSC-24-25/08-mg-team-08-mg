@@ -1,4 +1,4 @@
-#include "PoissonSolver.h"  
+#include "PoissonSolver.hpp"  
 #include <cmath>            
 #include <iostream>        
 #include <iomanip> 

@@ -1,5 +1,5 @@
-#include "PoissonSolver.h"
-#include "PoissonSolverParallel.h"
+#include "PoissonSolver.hpp"
+#include "PoissonSolverParallel.hpp"
 #include <iostream>
 
 int main() {

@@ -1,4 +1,4 @@
-#include "PoissonSolverParallel.h"
+#include "PoissonSolverParallel.hpp"
 #include <cmath>
 #include <iostream>
 #include <iomanip>

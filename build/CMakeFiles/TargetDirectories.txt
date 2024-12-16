@@ -1,3 +1,0 @@
-/home/jellyfish/shared-folder/AMSC/08-mg-team-08-mg/build/CMakeFiles/PoissonSolver.dir
-/home/jellyfish/shared-folder/AMSC/08-mg-team-08-mg/build/CMakeFiles/edit_cache.dir
-/home/jellyfish/shared-folder/AMSC/08-mg-team-08-mg/build/CMakeFiles/rebuild_cache.dir

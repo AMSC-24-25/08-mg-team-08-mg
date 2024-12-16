@@ -10,6 +10,7 @@ $$
 
 
 ### gauss_seidel_smooth method implementation
+the number of smoothing iterations, each sweep reduces high-frequency errors in the solution
 Assuming that $a$ is a known constant, a uniform Cartesian grid with spacing $h$, the Laplacian $\nabla^2 u$ is approximated at a grid point $(i, j)$ as:
 
 $$

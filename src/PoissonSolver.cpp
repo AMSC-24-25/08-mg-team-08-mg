@@ -87,13 +87,48 @@ std::vector<std::vector<double>> PoissonSolver::prolong_correction(const std::ve
     return fine_grid;
 }
 
+void PoissonSolver::v_cycle(int level, std::vector<std::vector<double>> &u_level, 
+                                      std::vector<std::vector<double>> &rhs_level, int num_levels) {
+    // Pre-smoothing
+    gauss_seidel_smooth(5);
+
+    if (level < num_levels - 1) {
+        auto residual = compute_residual();
+
+        // Restrict residual to coarser grid
+        auto coarse_residual = restrict_residual(residual);
+
+        int coarse_N = (u_level.size() + 1) / 2;
+        std::vector<std::vector<double>> coarse_u(coarse_N, std::vector<double>(coarse_N, 0.0));
+
+        // Recursive call to the V-cycle on the coarser grid
+        v_cycle(level + 1, coarse_u, coarse_residual, num_levels);
+
+        // Prolong correction to finer grid
+        auto correction = prolong_correction(coarse_u);
+
+        // Apply correction to the finer grid solution
+        for (int i = 1; i < u_level.size() - 1; ++i) {
+            for (int j = 1; j < u_level.size() - 1; ++j) {
+                u_level[i][j] += correction[i][j];
+            }
+        }
+    }
+
+    // Post-smoothing
+    gauss_seidel_smooth(5);
+}
+
 // Solve using multigrid
 void PoissonSolver::solve() {
     initialize();
     int iter = 0;
     double error = 1e10;
     while (iter < max_iter && error > tolerance) {
-        gauss_seidel_smooth(5);
+        // Perform one V-cycle
+        v_cycle(0, u, rhs, std::log2(N - 1));
+
+        // Compute residual and calculate error
         auto residual = compute_residual();
         error = 0.0;
         for (int i = 0; i < N; ++i) {

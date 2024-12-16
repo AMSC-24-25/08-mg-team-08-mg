@@ -18,8 +18,8 @@ public:
     /**
      * Solve the Poisson equation
      */
-    void solve();
-    void solve_plain_gauss_seidel();
+    std::vector<double> solve();
+    std::vector<double> solve_iterative();
 
 private:
     int N;                     // Number of grid points

@@ -7,13 +7,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Include directories
 include_directories(include)
+add_subdirectory(matplotplusplus)
 
 # Source files
 set(SOURCES
     src/PoissonSolver.cpp
-    src/PoissonSolverParallel.cpp  # Add this line
+    src/PoissonSolverParallel.cpp
+    src/plot_errors.cpp
     src/main.cpp
 )
 
-# Define executable
+# Define executable and link Matplot++ library
 add_executable(PoissonSolver ${SOURCES})
+target_link_libraries(PoissonSolver PUBLIC matplot)

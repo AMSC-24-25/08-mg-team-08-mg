@@ -155,33 +155,43 @@ void PoissonSolver::v_cycle(int level, std::vector<std::vector<double>> &u_level
 }
 
 // Solve using multigrid
-void PoissonSolver::solve() {
-    initialize();
+std::vector<double> PoissonSolver::solve() {
+    initialize(); // Initialize the grid and RHS
     int iter = 0;
     double error = 1e10;
+    std::vector<double> errors; // Store errors for plotting
+
     while (iter < max_iter && error > tolerance) {
         // Perform one V-cycle
-        // v_cycle(0, u, rhs, std::log2(N - 1));
         v_cycle(0, u, rhs, levels);
 
-        // Compute residual and calculate error
+        // Compute residual and error
         auto residual = compute_residual();
         error = 0.0;
-        for (int i = 0; i < N; ++i) {
-            for (int j = 0; j < N; ++j) {
+
+        for (int i = 1; i < N - 1; ++i) {
+            for (int j = 1; j < N - 1; ++j) {
                 error += residual[i][j] * residual[i][j];
             }
         }
         error = std::sqrt(error);
-        std::cout << "Iteration: " << iter << ", Error: " << error << "\n";
+
+        // Store the error
+        errors.push_back(error);
+
         iter++;
     }
+
+    return errors;
 }
 
-void PoissonSolver::solve_plain_gauss_seidel() {
+
+//solve using plain Iterative method
+std::vector<double> PoissonSolver::solve_iterative() {
     initialize(); // Initialize the grid and RHS
     int iter = 0;
     double error = 1e10;
+    std::vector<double> errors;
 
     while (iter < max_iter && error > tolerance) {
         // Perform one full Gauss-Seidel sweep
@@ -198,14 +208,11 @@ void PoissonSolver::solve_plain_gauss_seidel() {
         }
         error = std::sqrt(error);
 
-        // Output iteration info
-        std::cout << "Plain Gauss-Seidel Iteration: " << iter << ", Error: " << error << "\n";
+        // Store the error
+        errors.push_back(error);
+
         iter++;
     }
 
-    if (error <= tolerance) {
-        std::cout << "Plain Gauss-Seidel converged in " << iter << " iterations.\n";
-    } else {
-        std::cout << "Plain Gauss-Seidel did not converge after " << max_iter << " iterations.\n";
-    }
+    return errors;
 }

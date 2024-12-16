@@ -31,7 +31,17 @@ $$
 
 
 
-### How to run: 
+## How to use: 
+### install once
+```
+apt-get install gnuplot
+cd include
+git clone https://github.com/alandefreitas/matplotplusplus.git
+cd ..
+```
+
+
+### run
 ```
 mkdir -p build
 cd build

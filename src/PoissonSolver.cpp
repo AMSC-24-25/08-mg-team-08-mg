@@ -96,15 +96,31 @@ std::vector<std::vector<double>> PoissonSolver::restrict_residual(const std::vec
 
 // Prolong correction to finer grid
 std::vector<std::vector<double>> PoissonSolver::prolong_correction(const std::vector<std::vector<double>> &coarse_grid) {
-    int fine_N = (N - 1) * 2 + 1;
+    int fine_N = (coarse_grid.size() - 1) * 2 + 1;
     std::vector<std::vector<double>> fine_grid(fine_N, std::vector<double>(fine_N, 0.0));
+
     for (int i = 0; i < coarse_grid.size(); ++i) {
         for (int j = 0; j < coarse_grid[0].size(); ++j) {
-            fine_grid[2 * i][2 * j] = coarse_grid[i][j];
+            // Transfer the value of the coincident coarse node
+            fine_grid[2 * i][2 * j] += coarse_grid[i][j];
+
+            // North, South, East, West neighbors (1/2 of the value)
+            if (2 * i - 1 >= 0) fine_grid[2 * i - 1][2 * j] += 0.5 * coarse_grid[i][j]; // North
+            if (2 * i + 1 < fine_N) fine_grid[2 * i + 1][2 * j] += 0.5 * coarse_grid[i][j]; // South
+            if (2 * j - 1 >= 0) fine_grid[2 * i][2 * j - 1] += 0.5 * coarse_grid[i][j]; // West
+            if (2 * j + 1 < fine_N) fine_grid[2 * i][2 * j + 1] += 0.5 * coarse_grid[i][j]; // East
+
+            // Diagonal neighbors (1/4 of the value)
+            if (2 * i - 1 >= 0 && 2 * j - 1 >= 0) fine_grid[2 * i - 1][2 * j - 1] += 0.25 * coarse_grid[i][j]; // North-West
+            if (2 * i - 1 >= 0 && 2 * j + 1 < fine_N) fine_grid[2 * i - 1][2 * j + 1] += 0.25 * coarse_grid[i][j]; // North-East
+            if (2 * i + 1 < fine_N && 2 * j - 1 >= 0) fine_grid[2 * i + 1][2 * j - 1] += 0.25 * coarse_grid[i][j]; // South-West
+            if (2 * i + 1 < fine_N && 2 * j + 1 < fine_N) fine_grid[2 * i + 1][2 * j + 1] += 0.25 * coarse_grid[i][j]; // South-East
         }
     }
+
     return fine_grid;
 }
+
 
 void PoissonSolver::v_cycle(int level, std::vector<std::vector<double>> &u_level, 
                                       std::vector<std::vector<double>> &rhs_level, int num_levels) {

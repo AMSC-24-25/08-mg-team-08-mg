@@ -145,7 +145,8 @@ void PoissonSolver::solve() {
     double error = 1e10;
     while (iter < max_iter && error > tolerance) {
         // Perform one V-cycle
-        v_cycle(0, u, rhs, std::log2(N - 1));
+        // v_cycle(0, u, rhs, std::log2(N - 1));
+        v_cycle(0, u, rhs, 3);
 
         // Compute residual and calculate error
         auto residual = compute_residual();
@@ -158,5 +159,37 @@ void PoissonSolver::solve() {
         error = std::sqrt(error);
         std::cout << "Iteration: " << iter << ", Error: " << error << "\n";
         iter++;
+    }
+}
+
+void PoissonSolver::solve_plain_gauss_seidel() {
+    initialize(); // Initialize the grid and RHS
+    int iter = 0;
+    double error = 1e10;
+
+    while (iter < max_iter && error > tolerance) {
+        // Perform one full Gauss-Seidel sweep
+        gauss_seidel_smooth(1);
+
+        // Compute residual and error
+        auto residual = compute_residual();
+        error = 0.0;
+
+        for (int i = 1; i < N - 1; ++i) {
+            for (int j = 1; j < N - 1; ++j) {
+                error += residual[i][j] * residual[i][j];
+            }
+        }
+        error = std::sqrt(error);
+
+        // Output iteration info
+        std::cout << "Plain Gauss-Seidel Iteration: " << iter << ", Error: " << error << "\n";
+        iter++;
+    }
+
+    if (error <= tolerance) {
+        std::cout << "Plain Gauss-Seidel converged in " << iter << " iterations.\n";
+    } else {
+        std::cout << "Plain Gauss-Seidel did not converge after " << max_iter << " iterations.\n";
     }
 }

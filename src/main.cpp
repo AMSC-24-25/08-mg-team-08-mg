@@ -3,20 +3,20 @@
 #include <iostream>
 
 int main() {
-    int N = 257;                // Grid size
-    double a = 1.0;            // Scaling constant
-    int max_iter = 10000;      // Maximum iterations
-    double tolerance = 1e-13;   // Convergence tolerance
+    int N = 65;                // Grid size
+    double a = 1.0;             // Scaling constant
+    int max_iter = 10000;       // Maximum iterations
+    double tolerance = 1e-10;   // Convergence tolerance
 
-    // Run the serial PoissonSolver
-    PoissonSolver solver(N, a, max_iter, tolerance);
-    std::cout << "Running Serial PoissonSolver...\n";
-    solver.solve();
+    // Run the plain Gauss-Seidel solver
+    PoissonSolver plainSolver(N, a, max_iter, tolerance);
+    std::cout << "Running Plain Gauss-Seidel Solver...\n";
+    plainSolver.solve_plain_gauss_seidel();
 
-    // Run the parallel PoissonSolverParallel
-    PoissonSolverParallel parallelSolver(N, a, max_iter, tolerance);
-    std::cout << "Running Parallel PoissonSolverParallel...\n";
-    parallelSolver.solve();
+    // Run the multigrid PoissonSolver
+    PoissonSolver multigridSolver(N, a, max_iter, tolerance);
+    std::cout << "Running Multigrid PoissonSolver...\n";
+    multigridSolver.solve();
 
     return 0;
 }

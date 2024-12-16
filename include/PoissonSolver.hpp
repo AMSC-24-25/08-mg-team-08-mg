@@ -13,11 +13,12 @@ public:
      * @param tolerance - Convergence tolerance
      */
     PoissonSolver(int N, double a, int max_iter, double tolerance);
-
+    
     /**
      * Solve the Poisson equation
      */
     void solve();
+    void solve_plain_gauss_seidel();
 
 private:
     int N;                     // Number of grid points
@@ -80,6 +81,8 @@ private:
      */
     void v_cycle(int level, std::vector<std::vector<double>> &u_level, 
                  std::vector<std::vector<double>> &rhs_level, int num_levels);
+
+    
 
 };
 

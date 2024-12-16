@@ -78,6 +78,10 @@ private:
 
     /**
      * Perform a V-cycle multigrid iteration
+     * @param level - Current multigrid level
+     * @param u_level - Solution grid at the current level
+     * @param rhs_level - Right-hand side at the current level
+     * @param num_levels - Total number of multigrid levels
      */
     void v_cycle(int level, std::vector<std::vector<double>> &u_level, 
                  std::vector<std::vector<double>> &rhs_level, int num_levels);

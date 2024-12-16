@@ -11,6 +11,7 @@ include_directories(include)
 # Source files
 set(SOURCES
     src/PoissonSolver.cpp
+    src/PoissonSolverParallel.cpp  # Add this line
     src/main.cpp
 )
 

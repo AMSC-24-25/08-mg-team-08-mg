@@ -32,7 +32,7 @@ $$
 
 
 ## How to use: 
-### install once
+### install dependency
 ```
 apt-get install gnuplot
 cd include
@@ -41,12 +41,16 @@ cd ..
 ```
 
 
-### run
+### compile
 ```
 mkdir -p build
 cd build
 cmake ..
 make
+```
+
+### run
+```
 ./PoissonSolver
 cd ..
 ```

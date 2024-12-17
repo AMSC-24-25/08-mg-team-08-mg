@@ -59,3 +59,10 @@ make
 ./PoissonSolver
 cd ..
 ```
+
+
+### Lazy Run
+
+```
+./run.sh
+```

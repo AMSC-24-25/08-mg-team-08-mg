@@ -3,7 +3,9 @@
 #include <sstream>
 #include <unordered_map>
 #include <vector>
+#include <chrono> // For timing
 #include "PoissonSolver.hpp"
+#include "PoissonSolverParallel.hpp"
 #include "plot_errors.hpp"
 
 void save_errors(const std::string &filename, const std::vector<double> &errors) {
@@ -66,20 +68,71 @@ int main() {
     // Read the levels as a comma-separated string, then parse it into a vector of integers
     std::vector<int> levels = parse_levels(config["levels"]);
 
-    // Run the plain Gauss-Seidel solver
+    // Run the plain Gauss-Seidel solver (sequential)
     std::cout << "Running Plain Gauss-Seidel Solver (No MG)...\n";
     PoissonSolver plainSolver(N, a, max_iter, tolerance, 1);
+
+    // Measure execution time for sequential solver
+    auto start = std::chrono::high_resolution_clock::now();
     std::vector<double> plain_errors = plainSolver.solve_iterative();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> plain_duration = end - start;
+
+    std::cout << "Plain Gauss-Seidel Solver execution time: " 
+              << plain_duration.count() << " seconds.\n";
+
     save_errors("plain_errors.csv", plain_errors);
 
-    // Run multigrid solver for different levels
+    // Run the multigrid solver (sequential) for different levels
     for (int level : levels) {
         std::cout << "Running Multigrid PoissonSolver with levels = " << level << "...\n";
         PoissonSolver solver(N, a, max_iter, tolerance, level);
+
+        // Measure execution time for sequential multigrid solver
+        start = std::chrono::high_resolution_clock::now();
         std::vector<double> errors = solver.solve();
+        end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> solver_duration = end - start;
+
+        std::cout << "Multigrid PoissonSolver (Level " << level << ") execution time: "
+                  << solver_duration.count() << " seconds.\n";
 
         // Save errors to a file named "multigrid_errors_level_X.csv"
         std::string filename = "multigrid_errors_level_" + std::to_string(level) + ".csv";
+        save_errors(filename, errors);
+    }
+
+    // Run the parallel solver (PoissonSolverParallel)
+    std::cout << "Running Parallel PoissonSolver...\n";
+    PoissonSolverParallel parallelSolver(N, a, max_iter, tolerance, 1);
+
+    // Measure execution time for parallel solver
+    start = std::chrono::high_resolution_clock::now();
+    std::vector<double> parallel_errors = parallelSolver.solve_iterative();
+    end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> parallel_duration = end - start;
+
+    std::cout << "Parallel PoissonSolver execution time: " 
+              << parallel_duration.count() << " seconds.\n";
+
+    save_errors("parallel_errors.csv", parallel_errors);
+
+    // Run the parallel multigrid solver for different levels
+    for (int level : levels) {
+        std::cout << "Running Parallel Multigrid PoissonSolver with levels = " << level << "...\n";
+        PoissonSolverParallel parallelSolver(N, a, max_iter, tolerance, level);
+
+        // Measure execution time for parallel multigrid solver
+        start = std::chrono::high_resolution_clock::now();
+        std::vector<double> errors = parallelSolver.solve();
+        end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> parallel_solver_duration = end - start;
+
+        std::cout << "Parallel Multigrid PoissonSolver (Level " << level << ") execution time: "
+                  << parallel_solver_duration.count() << " seconds.\n";
+
+        // Save errors to a file named "parallel_multigrid_errors_level_X.csv"
+        std::string filename = "parallel_multigrid_errors_level_" + std::to_string(level) + ".csv";
         save_errors(filename, errors);
     }
 
@@ -87,4 +140,6 @@ int main() {
     plot_errors(levels);
 
     return 0;
+
+    
 }

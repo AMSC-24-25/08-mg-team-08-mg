@@ -12,6 +12,6 @@ fi
 mkdir -p build
 cd build
 cmake ..
-make 
+make -j 10 
 ./PoissonSolver
 cd ..

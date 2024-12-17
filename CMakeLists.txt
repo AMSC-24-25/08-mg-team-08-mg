@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Include directories
 include_directories(include)
-add_subdirectory(matplotplusplus)
+add_subdirectory(include/matplotplusplus)
 
 # Source files
 set(SOURCES

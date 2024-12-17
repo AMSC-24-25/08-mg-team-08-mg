@@ -1,0 +1,5 @@
+N=65
+a=1.0
+max_iter=10000
+tolerance=1e-10
+levels=3

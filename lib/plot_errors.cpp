@@ -1,4 +1,4 @@
-#include "plot_errors.hpp"
+#include "../include/plot_errors.hpp"
 #include <fstream>
 #include <sstream>
 #include <stdexcept>

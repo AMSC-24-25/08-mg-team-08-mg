@@ -11,9 +11,9 @@ add_subdirectory(include/matplotplusplus)
 
 # Source files
 set(SOURCES
-    src/PoissonSolver.cpp
-    src/PoissonSolverParallel.cpp
-    src/plot_errors.cpp
+    lib/PoissonSolver.cpp
+    lib/PoissonSolverParallel.cpp
+    lib/plot_errors.cpp
     src/main.cpp
 )
 

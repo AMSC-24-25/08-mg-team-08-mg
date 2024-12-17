@@ -2,8 +2,9 @@
 #include "plot_errors.hpp"
 #include <iostream>
 #include <fstream>
+#include <vector>
 
-
+// Function to save errors to CSV
 void save_errors(const std::string &filename, const std::vector<double> &errors) {
     std::ofstream file(filename);
     if (file.is_open()) {
@@ -19,20 +20,29 @@ void save_errors(const std::string &filename, const std::vector<double> &errors)
 int main() {
     int N = 65;                 // Grid size
     double a = 1.0;             // Scaling constant
-    int max_iter = 10000;       // Maximum iterations
+    int max_iter = 5000;       // Maximum iterations
     double tolerance = 1e-10;   // Convergence tolerance
-    int levels = 3;             // Number of coarsening levels
+    std::vector<int> levels = {1, 3, 5, 7};
 
     // Run the plain Gauss-Seidel solver
-    PoissonSolver plainSolver(N, a, max_iter, tolerance, levels);
-    std::vector<double> iterative_errors = plainSolver.solve_iterative();
-    save_errors("iterative_errors.csv", iterative_errors);
+    std::cout << "Running Plain Gauss-Seidel Solver (No MG)...\n";
+    PoissonSolver plainSolver(N, a, max_iter, tolerance, 1);
+    std::vector<double> plain_errors = plainSolver.solve_iterative();
+    save_errors("plain_errors.csv", plain_errors);
 
-    // Run the multigrid PoissonSolver
-    PoissonSolver multigridSolver(N, a, max_iter, tolerance, levels);
-    std::vector<double> multigrid_errors = multigridSolver.solve();
-    save_errors("multigrid_errors.csv", multigrid_errors);
-    plot_errors();
+    // Run multigrid solver for different levels
+    for (int level : levels) {
+        std::cout << "Running Multigrid PoissonSolver with levels = " << level << "...\n";
+        PoissonSolver solver(N, a, max_iter, tolerance, level);
+        std::vector<double> errors = solver.solve();
+
+        // Save errors to a file named "multigrid_errors_level_X.csv"
+        std::string filename = "multigrid_errors_level_" + std::to_string(level) + ".csv";
+        save_errors(filename, errors);
+    }
+
+    // Plot all results
+    plot_errors(levels);
 
     return 0;
 }

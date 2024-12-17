@@ -9,6 +9,6 @@
 void read_csv(const std::string &filename, std::vector<int> &iterations, std::vector<double> &errors);
 
 // Function to plot the errors
-void plot_errors();
+void plot_errors(std::vector<int> levels);
 
 #endif

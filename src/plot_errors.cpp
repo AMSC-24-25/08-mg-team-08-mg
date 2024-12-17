@@ -25,44 +25,43 @@ void read_csv(const std::string &filename, std::vector<int> &iterations, std::ve
     file.close();
 }
 
-// Function to plot the errors
-void plot_errors() {
-    // Data containers
-    std::vector<int> plain_iterations, multigrid_iterations;
-    std::vector<double> plain_errors, multigrid_errors;
-
-    // Read CSV files
-    read_csv("iterative_errors.csv", plain_iterations, plain_errors);
-    read_csv("multigrid_errors.csv", multigrid_iterations, multigrid_errors);
-
-    // Apply log10 transformation manually to errors for plotting
-    std::vector<double> plain_errors_log, multigrid_errors_log;
-    for (auto &e : plain_errors) plain_errors_log.push_back(std::log10(e));
-    for (auto &e : multigrid_errors) multigrid_errors_log.push_back(std::log10(e));
-
-    // Create the plot
+// Function to plot errors for multiple levels
+void plot_errors(std::vector<int> levels) {
     auto fig = figure(true);
+    hold(on); // Allow multiple plots on the same figure
 
-    hold(on); // Keep multiple plots on the same figure
+    // Plot "No Multigrid" data
+    std::vector<int> plain_iterations;
+    std::vector<double> plain_errors;
+    read_csv("plain_errors.csv", plain_iterations, plain_errors);
+    std::vector<double> plain_errors_log;
+    for (auto &e : plain_errors) plain_errors_log.push_back(std::log10(e));
+    plot(plain_iterations, plain_errors_log)->line_style("--").line_width(2).display_name("No MG");
 
-    // Plot data
-    auto p1 = plot(plain_iterations, plain_errors_log);
-    p1->line_width(2).line_style("--");
-    p1->display_name("No MG");
+    for (int level : levels) {
+        // File name for the current level
+        std::string filename = "multigrid_errors_level_" + std::to_string(level) + ".csv";
 
-    auto p2 = plot(multigrid_iterations, multigrid_errors_log);
-    p2->line_width(2).line_style("-");
-    p2->display_name("Multigrid");
+        // Read errors from file
+        std::vector<int> iterations;
+        std::vector<double> errors;
+        read_csv(filename, iterations, errors);
 
-    hold(off); // Release hold to finalize plotting
+        // Apply log10 transformation to errors
+        std::vector<double> log_errors;
+        for (auto &e : errors) log_errors.push_back(std::log10(e));
 
-    // Configure axes
+        // Plot the data
+        plot(iterations, log_errors)->line_width(2).display_name("Levels = " + std::to_string(level));
+    }
+
+    hold(off);
+
+    // Configure the plot
     xlabel("Iteration");
     ylabel("Log10(Error)");
-    title("Error vs. Iteration: Gauss-Seidel vs. Multigrid (Log Scale)");
+    title("Error vs. Iteration for Multigrid Solver at Different Levels");
     legend();
-
-    // Save the plot
-    save("error_comparison.png");
-    std::cout << "Plot saved in /build as 'error_comparison.png'" << std::endl;
+    save("multigrid_convergence.png");
+    std::cout << "Plot saved as 'multigrid_convergence.png'\n";
 }

@@ -62,6 +62,6 @@ void plot_errors(std::vector<int> levels) {
     ylabel("Log10(Error)");
     title("Error vs. Iteration for Multigrid Solver at Different Levels");
     legend();
-    save("multigrid_convergence.png");
+    save("/home/jellyfish/shared-folder/AMSC/08-mg-team-08-mg/data/multigrid_convergence.png");
     std::cout << "Plot saved as 'multigrid_convergence.png'\n";
 }

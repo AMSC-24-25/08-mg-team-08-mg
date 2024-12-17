@@ -68,6 +68,7 @@ int main() {
     // Read the levels as a comma-separated string, then parse it into a vector of integers
     std::vector<int> levels = parse_levels(config["levels"]);
 
+    //! Point 1
     // Run the plain Gauss-Seidel solver (sequential)
     std::cout << "Running Plain Gauss-Seidel Solver (No MG)...\n";
     PoissonSolver plainSolver(N, a, max_iter, tolerance, 1);
@@ -102,6 +103,7 @@ int main() {
         save_errors(filename, errors);
     }
 
+    //! Point 2
     // Run the parallel solver (PoissonSolverParallel)
     std::cout << "Running Parallel PoissonSolver...\n";
     PoissonSolverParallel parallelSolver(N, a, max_iter, tolerance, 1);
@@ -141,5 +143,5 @@ int main() {
 
     return 0;
 
-    
+
 }

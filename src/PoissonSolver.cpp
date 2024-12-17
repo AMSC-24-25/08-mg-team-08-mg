@@ -1,22 +1,23 @@
-#include "PoissonSolver.hpp"  
+#include "../include/PoissonSolver.hpp"  
 #include <cmath>            
 #include <iostream>        
 #include <iomanip> 
+using namespace std;
 
 /// Constructor
 PoissonSolver::PoissonSolver(int N, double a, int max_iter, double tolerance, int levels)
     : N(N), a(a), max_iter(max_iter), tolerance(tolerance), levels(levels) {
-    u = std::vector<std::vector<double>>(N, std::vector<double>(N, 0.0));
-    rhs = std::vector<std::vector<double>>(N, std::vector<double>(N, 0.0));
+    u = vector<vector<double>>(N, vector<double>(N, 0.0));
+    rhs = vector<vector<double>>(N, vector<double>(N, 0.0));
 }
 
 // Function example from docs
 double PoissonSolver::analytical_solution(double x, double y) {
-    return std::exp(x) * std::exp(-2.0 * y);
+    return exp(x) * exp(-2.0 * y);
 }
 
 double PoissonSolver::forcing_function(double x, double y) {
-    return -5.0 * std::exp(x) * std::exp(-2.0 * y);
+    return -5.0 * exp(x) * exp(-2.0 * y);
 }
 
 void PoissonSolver::initialize() {
@@ -46,9 +47,9 @@ void PoissonSolver::gauss_seidel_smooth(int num_sweeps) {
 }
 
 // Compute residual
-std::vector<std::vector<double>> PoissonSolver::compute_residual() {
+vector<vector<double>> PoissonSolver::compute_residual() {
     double h2_alpha = (1.0 / (N - 1)) * (1.0 / (N - 1)) / a;
-    std::vector<std::vector<double>> residual(N, std::vector<double>(N, 0.0));
+    vector<vector<double>> residual(N,vector<double>(N, 0.0));
     for (int i = 1; i < N - 1; ++i) {
         for (int j = 1; j < N - 1; ++j) {
             residual[i][j] = rhs[i][j] - (
@@ -60,9 +61,9 @@ std::vector<std::vector<double>> PoissonSolver::compute_residual() {
 }
 
 // Restrict residual to coarser grid
-std::vector<std::vector<double>> PoissonSolver::restrict_residual(const std::vector<std::vector<double>> &fine_grid) {
+vector<vector<double>> PoissonSolver::restrict_residual(const vector<vector<double>> &fine_grid) {
     int coarse_N = (N + 1) / 2;
-    std::vector<std::vector<double>> coarse_grid(coarse_N, std::vector<double>(coarse_N, 0.0));
+    vector<vector<double>> coarse_grid(coarse_N, vector<double>(coarse_N, 0.0));
 
     for (int i = 1; i < coarse_N - 1; ++i) {
         for (int j = 1; j < coarse_N - 1; ++j) {
@@ -95,9 +96,9 @@ std::vector<std::vector<double>> PoissonSolver::restrict_residual(const std::vec
 
 
 // Prolong correction to finer grid
-std::vector<std::vector<double>> PoissonSolver::prolong_correction(const std::vector<std::vector<double>> &coarse_grid) {
+vector<vector<double>> PoissonSolver::prolong_correction(const vector<vector<double>> &coarse_grid) {
     int fine_N = (coarse_grid.size() - 1) * 2 + 1;
-    std::vector<std::vector<double>> fine_grid(fine_N, std::vector<double>(fine_N, 0.0));
+    vector<vector<double>> fine_grid(fine_N, vector<double>(fine_N, 0.0));
 
     for (int i = 0; i < coarse_grid.size(); ++i) {
         for (int j = 0; j < coarse_grid[0].size(); ++j) {
@@ -134,7 +135,7 @@ void PoissonSolver::v_cycle(int level, std::vector<std::vector<double>> &u_level
         auto coarse_residual = restrict_residual(residual);
 
         int coarse_N = (u_level.size() + 1) / 2;
-        std::vector<std::vector<double>> coarse_u(coarse_N, std::vector<double>(coarse_N, 0.0));
+        vector<vector<double>> coarse_u(coarse_N, vector<double>(coarse_N, 0.0));
 
         // Recursive call to the V-cycle on the coarser grid
         v_cycle(level + 1, coarse_u, coarse_residual, num_levels);
@@ -155,11 +156,11 @@ void PoissonSolver::v_cycle(int level, std::vector<std::vector<double>> &u_level
 }
 
 // Solve using multigrid
-std::vector<double> PoissonSolver::solve() {
+vector<double> PoissonSolver::solve() {
     initialize(); // Initialize the grid and RHS
     int iter = 0;
     double error = 1e10;
-    std::vector<double> errors; // Store errors for plotting
+    vector<double> errors; // Store errors for plotting
 
     while (iter < max_iter && error > tolerance) {
         // Perform one V-cycle
@@ -174,7 +175,7 @@ std::vector<double> PoissonSolver::solve() {
                 error += residual[i][j] * residual[i][j];
             }
         }
-        error = std::sqrt(error);
+        error = sqrt(error);
 
         // Store the error
         errors.push_back(error);
@@ -187,11 +188,11 @@ std::vector<double> PoissonSolver::solve() {
 
 
 //solve using plain Iterative method
-std::vector<double> PoissonSolver::solve_iterative() {
+vector<double> PoissonSolver::solve_iterative() {
     initialize(); // Initialize the grid and RHS
     int iter = 0;
     double error = 1e10;
-    std::vector<double> errors;
+    vector<double> errors;
 
     while (iter < max_iter && error > tolerance) {
         // Perform one full Gauss-Seidel sweep
@@ -206,7 +207,7 @@ std::vector<double> PoissonSolver::solve_iterative() {
                 error += residual[i][j] * residual[i][j];
             }
         }
-        error = std::sqrt(error);
+        error = sqrt(error);
 
         // Store the error
         errors.push_back(error);

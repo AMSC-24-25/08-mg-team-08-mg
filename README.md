@@ -52,12 +52,12 @@ mkdir -p build
 cd build
 cmake ..
 make
+cd ..
 ```
 
 ### run
 ```
-./PoissonSolver
-cd ..
+./build/PoissonSolver
 ```
 
 

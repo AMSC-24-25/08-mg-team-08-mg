@@ -39,7 +39,6 @@ void PoissonSolverParallel::initialize() {
 void PoissonSolverParallel::gauss_seidel_smooth(int num_sweeps) {
     double h2_a = (1.0 / (N - 1)) * (1.0 / (N - 1)) / a;
     for (int sweep = 0; sweep < num_sweeps; ++sweep) {
-        #pragma omp parallel for collapse(2) num_threads(8) // Parallelize with 8 threads
         for (int i = 1; i < N - 1; ++i) {
             for (int j = 1; j < N - 1; ++j) {
                 u[i][j] = 0.25 * (u[i + 1][j] + u[i - 1][j] + u[i][j + 1] + u[i][j - 1] - h2_a * rhs[i][j]);

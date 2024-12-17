@@ -1,5 +1,10 @@
 # Multigrid
-This project solves the 2D Poisson equation:
+This project solves the 2D Poisson equation using Multigrid with Gauss Seidel iterative method:
+
+<div align="center">
+    <img src="doc/multigrid_convergence.png" alt="Convergence Plot" width="500"/>
+</div>
+
 
 $$
 \begin{cases}

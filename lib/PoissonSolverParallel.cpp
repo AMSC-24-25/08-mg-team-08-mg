@@ -4,6 +4,8 @@
 #include <iomanip>
 #include <omp.h>
 
+// again, many of these methods should be classified as const.
+
 /// Constructor
 PoissonSolverParallel::PoissonSolverParallel(int N, double a, int max_iter, double tolerance, int levels, int num_cores)
     : N(N), a(a), max_iter(max_iter), tolerance(tolerance), levels(levels), num_cores(num_cores) {
@@ -28,6 +30,9 @@ void PoissonSolverParallel::initialize() {
             double x = i * h;
             double y = j * h;
             rhs[i][j] = forcing_function(x, y);
+
+            // in general you do not have an analytical solution. So it is better to leave the
+            // treatment of a possible analytical solution as an optional thing.
             if (i == 0 || i == N - 1 || j == 0 || j == N - 1) {
                 u[i][j] = analytical_solution(x, y);
             }
@@ -100,6 +105,7 @@ std::vector<std::vector<double>> PoissonSolverParallel::prolong_correction(const
     for (int i = 0; i < coarse_grid.size(); ++i) {
         for (int j = 0; j < coarse_grid[0].size(); ++j) {
             fine_grid[2 * i][2 * j] += coarse_grid[i][j];
+            // a lot of ifs and some of them could be nested. remember that if are costly, they do not come for free.
             if (2 * i - 1 >= 0) fine_grid[2 * i - 1][2 * j] += 0.5 * coarse_grid[i][j];
             if (2 * i + 1 < fine_N) fine_grid[2 * i + 1][2 * j] += 0.5 * coarse_grid[i][j];
             if (2 * j - 1 >= 0) fine_grid[2 * i][2 * j - 1] += 0.5 * coarse_grid[i][j];

@@ -21,6 +21,7 @@ public:
      */
     std::vector<double> solve();
     std::vector<double> solve_iterative();
+    
 
 private:
     int N;                     // Number of grid points

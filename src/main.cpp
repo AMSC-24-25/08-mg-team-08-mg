@@ -5,9 +5,9 @@
 #include <vector>
 #include <chrono> // For timing
 #include <thread> // For hardware_concurrency
-#include "../include/PoissonSolver.hpp"
-#include "../include/PoissonSolverParallel.hpp"
-#include "../include/plot_errors.hpp"
+#include "./PoissonSolver.hpp"
+#include "./PoissonSolverParallel.hpp"
+#include "./plot_errors.hpp"
 
 
 void save_errors(const std::string &filename, const std::vector<double> &errors) {

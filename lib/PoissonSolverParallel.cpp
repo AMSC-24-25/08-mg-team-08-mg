@@ -4,7 +4,6 @@
 #include <iomanip>
 #include <omp.h>
 
-// again, many of these methods should be classified as const.
 
 /// Constructor
 PoissonSolverParallel::PoissonSolverParallel(int N, double a, int max_iter, double tolerance, int levels, int num_cores)
@@ -14,11 +13,11 @@ PoissonSolverParallel::PoissonSolverParallel(int N, double a, int max_iter, doub
 }
 
 // Function example from docs
-double PoissonSolverParallel::analytical_solution(double x, double y) {
+double PoissonSolverParallel::analytical_solution(double x, double y) const {
     return std::exp(x) * std::exp(-2.0 * y);
 }
 
-double PoissonSolverParallel::forcing_function(double x, double y) {
+double PoissonSolverParallel::forcing_function(double x, double y) const {
     return -5.0 * std::exp(x) * std::exp(-2.0 * y);
 }
 
@@ -53,7 +52,7 @@ void PoissonSolverParallel::gauss_seidel_smooth(int num_sweeps) {
 }
 
 // Compute residual
-std::vector<std::vector<double>> PoissonSolverParallel::compute_residual() {
+std::vector<std::vector<double>> PoissonSolverParallel::compute_residual() const{
     double h2_alpha = (1.0 / (N - 1)) * (1.0 / (N - 1)) / a;
     std::vector<std::vector<double>> residual(N, std::vector<double>(N, 0.0));
     
@@ -69,7 +68,7 @@ std::vector<std::vector<double>> PoissonSolverParallel::compute_residual() {
 }
 
 // Restrict residual to coarser grid
-std::vector<std::vector<double>> PoissonSolverParallel::restrict_residual(const std::vector<std::vector<double>> &fine_grid) {
+std::vector<std::vector<double>> PoissonSolverParallel::restrict_residual(const std::vector<std::vector<double>> &fine_grid) const{
     int coarse_N = (N + 1) / 2;
     std::vector<std::vector<double>> coarse_grid(coarse_N, std::vector<double>(coarse_N, 0.0));
 
@@ -97,7 +96,7 @@ std::vector<std::vector<double>> PoissonSolverParallel::restrict_residual(const 
 }
 
 // Prolong correction to finer grid
-std::vector<std::vector<double>> PoissonSolverParallel::prolong_correction(const std::vector<std::vector<double>> &coarse_grid) {
+std::vector<std::vector<double>> PoissonSolverParallel::prolong_correction(const std::vector<std::vector<double>> &coarse_grid) const{
     int fine_N = (coarse_grid.size() - 1) * 2 + 1;
     std::vector<std::vector<double>> fine_grid(fine_N, std::vector<double>(fine_N, 0.0));
 

@@ -12,11 +12,11 @@ PoissonSolver::PoissonSolver(int N, double a, int max_iter, double tolerance, in
 }
 
 // Function example from docs
-double PoissonSolver::analytical_solution(double x, double y) {
+double PoissonSolver::analytical_solution(double x, double y) const {
     return exp(x) * exp(-2.0 * y);
 }
 
-double PoissonSolver::forcing_function(double x, double y) {
+double PoissonSolver::forcing_function(double x, double y) const {
     return -5.0 * exp(x) * exp(-2.0 * y);
 }
 
@@ -47,7 +47,7 @@ void PoissonSolver::gauss_seidel_smooth(int num_sweeps) {
 }
 
 // Compute residual
-vector<vector<double>> PoissonSolver::compute_residual() {
+vector<vector<double>> PoissonSolver::compute_residual() const {
     double h2_alpha = (1.0 / (N - 1)) * (1.0 / (N - 1)) / a;
     vector<vector<double>> residual(N,vector<double>(N, 0.0));
     for (int i = 1; i < N - 1; ++i) {
@@ -61,7 +61,7 @@ vector<vector<double>> PoissonSolver::compute_residual() {
 }
 
 // Restrict residual to coarser grid
-vector<vector<double>> PoissonSolver::restrict_residual(const vector<vector<double>> &fine_grid) {
+vector<vector<double>> PoissonSolver::restrict_residual(const vector<vector<double>> &fine_grid) const {
     int coarse_N = (N + 1) / 2;
     vector<vector<double>> coarse_grid(coarse_N, vector<double>(coarse_N, 0.0));
 
@@ -96,7 +96,7 @@ vector<vector<double>> PoissonSolver::restrict_residual(const vector<vector<doub
 
 
 // Prolong correction to finer grid
-vector<vector<double>> PoissonSolver::prolong_correction(const vector<vector<double>> &coarse_grid) {
+vector<vector<double>> PoissonSolver::prolong_correction(const vector<vector<double>> &coarse_grid) const {
     int fine_N = (coarse_grid.size() - 1) * 2 + 1;
     vector<vector<double>> fine_grid(fine_N, vector<double>(fine_N, 0.0));
 

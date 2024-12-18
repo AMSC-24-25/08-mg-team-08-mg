@@ -44,7 +44,7 @@ private:
      * @param y - y-coordinate
      * @return Analytical solution value at (x, y)
      */
-    double analytical_solution(double x, double y);
+    double analytical_solution(double x, double y) const;
 
     /**
      * Forcing function for the Poisson equation
@@ -52,7 +52,7 @@ private:
      * @param y - y-coordinate
      * @return Forcing term value at (x, y)
      */
-    double forcing_function(double x, double y);
+    double forcing_function(double x, double y) const;
 
     /**
      * Perform parallel Gauss-Seidel smoothing
@@ -64,21 +64,21 @@ private:
      * Compute the residual of the current solution
      * @return Residual grid
      */
-    std::vector<std::vector<double>> compute_residual();
+    std::vector<std::vector<double>> compute_residual() const;
 
     /**
      * Restrict the residual to a coarser grid
      * @param fine_grid - The finer residual grid
      * @return Coarser residual grid
      */
-    std::vector<std::vector<double>> restrict_residual(const std::vector<std::vector<double>> &fine_grid);
+    std::vector<std::vector<double>> restrict_residual(const std::vector<std::vector<double>> &fine_grid) const;
 
     /**
      * Prolong the correction from a coarser grid to a finer grid
      * @param coarse_grid - The coarser correction grid
      * @return Finer correction grid
      */
-    std::vector<std::vector<double>> prolong_correction(const std::vector<std::vector<double>> &coarse_grid);
+    std::vector<std::vector<double>> prolong_correction(const std::vector<std::vector<double>> &coarse_grid) const;
 
     /**
      * Perform a V-cycle multigrid iteration

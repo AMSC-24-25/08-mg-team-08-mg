@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <vector>
 #include <chrono> // For timing
+#include <thread> // For hardware_concurrency
 #include "../include/PoissonSolver.hpp"
 #include "../include/PoissonSolverParallel.hpp"
 #include "../include/plot_errors.hpp"
@@ -105,9 +106,13 @@ int main() {
     }
 
     //! Point 2
+    // Get the number of CPU cores
+    int num_cores = std::thread::hardware_concurrency();
+    std::cout << "Number of CPU cores: " << num_cores << "\n";
+    
     // Run the parallel solver (PoissonSolverParallel)
     std::cout << "Running Parallel PoissonSolver...\n";
-    PoissonSolverParallel parallelSolver(N, a, max_iter, tolerance, 1);
+    PoissonSolverParallel parallelSolver(N, a, max_iter, tolerance, 1, num_cores);
 
     // Measure execution time for parallel solver
     start = std::chrono::high_resolution_clock::now();
@@ -123,7 +128,7 @@ int main() {
     // Run the parallel multigrid solver for different levels
     for (int level : levels) {
         std::cout << "Running Parallel Multigrid PoissonSolver with levels = " << level << "...\n";
-        PoissonSolverParallel parallelSolver(N, a, max_iter, tolerance, level);
+        PoissonSolverParallel parallelSolver(N, a, max_iter, tolerance, level, num_cores);
 
         // Measure execution time for parallel multigrid solver
         start = std::chrono::high_resolution_clock::now();

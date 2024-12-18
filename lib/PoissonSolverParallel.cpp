@@ -5,8 +5,8 @@
 #include <omp.h> // Include OpenMP header
 
 /// Constructor
-PoissonSolverParallel::PoissonSolverParallel(int N, double a, int max_iter, double tolerance, int levels)
-    : N(N), a(a), max_iter(max_iter), tolerance(tolerance), levels(levels) {
+PoissonSolverParallel::PoissonSolverParallel(int N, double a, int max_iter, double tolerance, int levels, int num_cores)
+    : N(N), a(a), max_iter(max_iter), tolerance(tolerance), levels(levels), num_cores(num_cores) {
     u = std::vector<std::vector<double>>(N, std::vector<double>(N, 0.0));
     rhs = std::vector<std::vector<double>>(N, std::vector<double>(N, 0.0));
 }
@@ -22,7 +22,7 @@ double PoissonSolverParallel::forcing_function(double x, double y) {
 
 void PoissonSolverParallel::initialize() {
     double h = 1.0 / (N - 1);
-    #pragma omp parallel for collapse(2) num_threads(8) // Parallelize with 8 threads
+    #pragma omp parallel for collapse(2) num_threads(num_cores) // Parallelize with 8 threads
     for (int i = 0; i < N; ++i) {
         for (int j = 0; j < N; ++j) {
             double x = i * h;
@@ -52,7 +52,7 @@ std::vector<std::vector<double>> PoissonSolverParallel::compute_residual() {
     double h2_alpha = (1.0 / (N - 1)) * (1.0 / (N - 1)) / a;
     std::vector<std::vector<double>> residual(N, std::vector<double>(N, 0.0));
     
-    #pragma omp parallel for collapse(2) num_threads(8) // Parallelize with 8 threads
+    #pragma omp parallel for collapse(2) num_threads(num_cores) // Parallelize with 8 threads
     for (int i = 1; i < N - 1; ++i) {
         for (int j = 1; j < N - 1; ++j) {
             residual[i][j] = rhs[i][j] - (
@@ -68,7 +68,7 @@ std::vector<std::vector<double>> PoissonSolverParallel::restrict_residual(const 
     int coarse_N = (N + 1) / 2;
     std::vector<std::vector<double>> coarse_grid(coarse_N, std::vector<double>(coarse_N, 0.0));
 
-    #pragma omp parallel for collapse(2) num_threads(8) // Parallelize with 8 threads
+    #pragma omp parallel for collapse(2) num_threads(num_cores) // Parallelize with 8 threads
     for (int i = 1; i < coarse_N - 1; ++i) {
         for (int j = 1; j < coarse_N - 1; ++j) {
             double central = 0.25 * fine_grid[2 * i][2 * j];
@@ -96,7 +96,7 @@ std::vector<std::vector<double>> PoissonSolverParallel::prolong_correction(const
     int fine_N = (coarse_grid.size() - 1) * 2 + 1;
     std::vector<std::vector<double>> fine_grid(fine_N, std::vector<double>(fine_N, 0.0));
 
-    #pragma omp parallel for collapse(2) num_threads(8) // Parallelize with 8 threads
+    #pragma omp parallel for collapse(2) num_threads(num_cores) // Parallelize with 8 threads
     for (int i = 0; i < coarse_grid.size(); ++i) {
         for (int j = 0; j < coarse_grid[0].size(); ++j) {
             fine_grid[2 * i][2 * j] += coarse_grid[i][j];
@@ -126,7 +126,7 @@ void PoissonSolverParallel::v_cycle(int level, std::vector<std::vector<double>> 
         std::vector<std::vector<double>> coarse_u(coarse_N, std::vector<double>(coarse_N, 0.0));
         v_cycle(level + 1, coarse_u, coarse_residual, num_levels);
         auto correction = prolong_correction(coarse_u);
-        #pragma omp parallel for collapse(2) num_threads(8)
+        #pragma omp parallel for collapse(2) num_threads(num_cores)
         for (int i = 1; i < u_level.size() - 1; ++i) {
             for (int j = 1; j < u_level.size() - 1; ++j) {
                 u_level[i][j] += correction[i][j];
@@ -147,7 +147,7 @@ std::vector<double> PoissonSolverParallel::solve() {
         v_cycle(0, u, rhs, levels);
         auto residual = compute_residual();
         error = 0.0;
-        #pragma omp parallel for reduction(+:error) collapse(2) num_threads(8)
+        #pragma omp parallel for reduction(+:error) collapse(2) num_threads(num_cores)
         for (int i = 1; i < N - 1; ++i) {
             for (int j = 1; j < N - 1; ++j) {
                 error += residual[i][j] * residual[i][j];
@@ -172,7 +172,7 @@ std::vector<double> PoissonSolverParallel::solve_iterative() {
         gauss_seidel_smooth(1);
         auto residual = compute_residual();
         error = 0.0;
-        #pragma omp parallel for reduction(+:error) collapse(2) num_threads(8)
+        #pragma omp parallel for reduction(+:error) collapse(2) num_threads(num_cores)
         for (int i = 1; i < N - 1; ++i) {
             for (int j = 1; j < N - 1; ++j) {
                 error += residual[i][j] * residual[i][j];

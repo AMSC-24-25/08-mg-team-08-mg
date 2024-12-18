@@ -12,8 +12,9 @@ public:
      * @param max_iter - Maximum number of iterations
      * @param tolerance - Convergence tolerance
      * @param levels - number of levels to coarsen
+     * @param num_cores - number of CPU cores to use
      */
-    PoissonSolverParallel(int N, double a, int max_iter, double tolerance, int levels);
+    PoissonSolverParallel(int N, double a, int max_iter, double tolerance, int levels, int num_cores);
     
     /**
      * Solve the Poisson equation using multigrid method

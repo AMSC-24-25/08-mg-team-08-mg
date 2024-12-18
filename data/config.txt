@@ -1,4 +1,4 @@
-N=129
+N=69
 a=1.0
 max_iter=5000
 tolerance=1e-10

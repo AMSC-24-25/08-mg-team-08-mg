@@ -1,10 +1,26 @@
-# Multigrid
-This project solves the 2D Poisson equation using Multigrid with Gauss Seidel iterative method:
+# Multigrid 2D Poisson Solver
+
+This repository contains a high-performance implementation of a **2D Poisson Equation Solver** using **Multigrid Methods** combined with the **Gauss-Seidel iterative smoothing technique**. The solver is designed for computational efficiency and supports parallel execution using OpenMP, making it suitable for large-scale numerical simulations.
 
 <div align="center">
     <img src="doc/multigrid_convergence.png" alt="Convergence Plot" width="500"/>
 </div>
 
+---
+
+## Table of Contents
+- [Overview](#overview)
+- [Mathematical Formulation](#mathematical-formulation)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Parallelization](#parallelization)
+
+---
+
+## Overview
+
+This project provides a scalable and efficient 2D Poisson equation solver using Multigrid Methods combined with Gauss-Seidel smoothing. It is designed primarily for educational and research purposes in computational science and numerical methods. The solver can handle large grids efficiently and leverages multicore parallelism through OpenMP.
 
 $$
 \begin{cases}
@@ -13,40 +29,62 @@ u = g & \text{on } \partial \Omega.
 \end{cases}
 $$
 
+The solution is achieved using a **Multigrid Method**, which accelerates convergence by addressing errors across different scales, combined with the **Gauss-Seidel iterative method** for smoothing. The implementation also supports parallelization using OpenMP for improved performance.
 
-### gauss_seidel_smooth method implementation
-the number of smoothing iterations each sweep reduces high-frequency errors in the solution
-Assuming that $a$ is a known constant, a uniform Cartesian grid with spacing $h$, the Laplacian $\nabla^2 u$ is approximated at a grid point $(i, j)$ as:
+---
+
+## Mathematical Formulation
+
+Assuming:
+- \(a\) is a known constant,
+- A uniform Cartesian grid with spacing \(h\),
+
+The Laplacian is approximated as:
 
 $$
 \nabla^2 u \approx \frac{u_{i+1,j} + u_{i-1,j} + u_{i,j+1} + u_{i,j-1} - 4u_{i,j}}{h^2}.
 $$
 
-Substituting this into the Poisson equation $-a \nabla^2 u = f$, we get:
-
-$$
--a \cdot \frac{u_{i+1,j} + u_{i-1,j} + u_{i,j+1} + u_{i,j-1} - 4u_{i,j}}{h^2} = f_{i,j}.
-$$
-
-Rearranging for $u_{i,j}$, we obtain the iterative update formula:
+Substituting into the Poisson equation, the iterative update formula becomes:
 
 $$
 u_{i,j} = \frac{1}{4} \left(u_{i+1,j} + u_{i-1,j} + u_{i,j+1} + u_{i,j-1} - \frac{h^2}{a} f_{i,j}\right).
 $$
 
+---
 
+## Features
 
-## How to use: 
-### install dependency
-```
+- **Multigrid V-Cycle:** Rapidly reduces both high- and low-frequency errors, accelerating convergence compared to classical iterative methods.
+- **Gauss-Seidel Smoothing:** Simple yet effective iterative method that eliminates high-frequency error components.
+- **OpenMP Parallelization:** Distributes work across multiple CPU cores, enabling faster solves on large grids.
+- **Flexible Boundary Conditions & Parameters:** Easily modify problem setups, grid sizes, and iteration counts.
+- **Visual Outputs:** Generate convergence plots to diagnose and visualize solver performance.
+
+---
+
+## Installation
+
+### Prerequisites
+- **Compiler:** C++11 compatible compiler
+- **CMake:** Version 3.28
+- **Gnuplot:** For generating plots
+- **OpenMP:** For parallel execution (often included in major compilers)
+- **Operating System:** Linux (tested), macOS (untested), Windows (untested)
+
+### Dependency Installation
+Clone and build the required library for visualization:
+
+```bash
+apt-get update
 apt-get install gnuplot
 cd include
 git clone https://github.com/alandefreitas/matplotplusplus.git
 cd ..
 ```
 
+### Compile the solver
 
-### compile
 ```
 mkdir -p build
 cd build
@@ -55,37 +93,46 @@ make
 cd ..
 ```
 
-### run
+### Run the solver
+
 ```
 ./build/PoissonSolver
 ```
 
-
-### Lazy Run
+### Or simply use the provided script for convenience
 
 ```
 ./run.sh
 ```
+## Usage
 
----
+### 1. Run the Solver
+To compute the solution for a predefined problem setup, simply execute the solver directly. Ensure that you have the necessary dependencies and environment variables set up before running. The solver will use its default parameters if you don’t specify any custom settings.
 
-### Parallelization Explanation for `PoissonSolverParallel`
+### 2. Modify Parameters
+If you wish to customize the problem’s parameters (such as grid size, boundary conditions, smoothing iterations, etc.), you can edit these values in the solver’s source files. This approach allows you to tailor the solver to different scenarios or test cases.
 
-The `PoissonSolverParallel` code was parallelized to speed up the computation by distributing the work across multiple threads using OpenMP. Here's a breakdown of why and how specific parts were parallelized:
+**Steps to modify parameters:**
+1. Open `\data\config.txt` .
+2. Change the values of parameters like grid size `N`, constant `a`, or `max_iter`.
+3. Rebuild the solver to apply the changes.
 
-1. **Initialization (`initialize` method)**:
-   - The initialization of the `rhs` (right-hand side) and boundary conditions for the solution `u` are independent operations for each grid point. These operations were parallelized using the `#pragma omp parallel for collapse(2)` directive, which allows multiple threads to compute values for different grid points simultaneously. This speeds up the initialization process by dividing the work across multiple threads.
+### 3. View Results
+The solver will print its results directly to the console, allowing you to monitor progress as the computation proceeds. Additionally, the solver saves the plot to ... for visualization.
 
-   
-2. **Residual Computation (`compute_residual` method)**:
-   - The computation of the residual for each grid point is also independent. Therefore, parallelization is applied here as well, allowing multiple threads to compute the residuals for different grid points simultaneously. This is done using the `#pragma omp parallel for` directive with a reduction on the error to ensure that the error sum is correctly calculated in parallel.
+## Parallelization
+The code uses OpenMP to distribute computations across multiple threads, enhancing performance for large problems. The default number of threads is set to 8. Modify the OMP_NUM_THREADS environment variable to adjust it.
 
-3. **Residual Restriction and Correction Prolongation (`restrict_residual` and `prolong_correction` methods)**:
-   - Both residual restriction (from fine to coarse grids) and correction prolongation (from coarse to fine grids) involve independent operations for each grid point. By applying `#pragma omp parallel for`, the operations for each point are parallelized across threads, reducing the overall computation time for these methods.
+Here’s how parallelization is achieved:
 
-4. **V-cycle (`v_cycle` method)**:
-   - The V-cycle method, which is the core of the multigrid algorithm, is parallelized by breaking down the operations for each grid point into separate tasks for different threads. The smoothing, residual computation, and correction prolongation steps in the V-cycle are all parallelized, allowing the solver to take advantage of multiple processors.
+### 1. Grid initialization: 
+Parallelized using #pragma omp parallel for collapse(2) to compute initial conditions for each grid point.
 
-5. **General Parallelization Strategy**:
-   - The parallelization was done using `#pragma omp parallel for` directives with the `collapse(2)` clause to handle two-dimensional loops efficiently. The number of threads is set to 8 using `num_threads(8)`, which controls the degree of parallelism. The parallelization improves performance by executing independent operations concurrently across multiple processors.
+### 2. Residual computation
+Residuals for each grid point are computed in parallel, with a reduction applied for accurate error summation.
 
+### 3. Grid transformations
+Restriction and Prolongation are parallelized to speedup the program.
+
+### 4. Iterative method smoothing
+...

@@ -2,7 +2,7 @@
 #include <cmath>
 #include <iostream>
 #include <iomanip>
-#include <omp.h> // Include OpenMP header
+#include <omp.h>
 
 /// Constructor
 PoissonSolverParallel::PoissonSolverParallel(int N, double a, int max_iter, double tolerance, int levels, int num_cores)

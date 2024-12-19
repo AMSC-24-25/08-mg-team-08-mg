@@ -20,6 +20,7 @@ public:
     
     /**
      * Solve the Poisson equation using multigrid method
+       NOTE: solve and solve_iterative should be const, since you expect to be able to call them on const objects.
      */
     std::vector<double> solve();
     std::vector<double> solve_iterative();

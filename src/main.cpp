@@ -3,14 +3,11 @@
 #include <sstream>
 #include <unordered_map>
 #include <vector>
-#include <chrono> // For timing
-#include <thread> // For hardware_concurrency
+#include <chrono>
+#include <thread>
 #include "./PoissonSolver.hpp"
 #include "./PoissonSolverParallel.hpp"
 #include "./plot.hpp"
-
-
-
 
 void save_errors(const std::string &filename, const std::vector<double> &errors) {
     std::ofstream file(filename);
@@ -149,11 +146,7 @@ int main() {
     double error = parallelSolver.determine_error();
     std::cout << "True error L2-norm of (sol - approx): " << error << "\n";
 
-    // Print the time taken for each level 
-    std::cout << "Level,Sequential Time,Parallel Time\n";
-    for (size_t i = 0; i < levels.size(); ++i) {
-        std::cout << "Level " << levels[i] << "," << seq_duration[i] << "," << par_duration[i] << "\n";
-    }
+    // Plot the time taken for each level 
     plot_times(seq_duration, par_duration, levels);
 
     // Plot all results

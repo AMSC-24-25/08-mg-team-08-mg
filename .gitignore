@@ -1,3 +1,11 @@
+# macOS
+.DS_Store
+.vscode
+
+# Build directory
+build
+include/matplotplusplus
+
 # Prerequisites
 *.d
 
@@ -30,3 +38,4 @@
 *.exe
 *.out
 *.app
+

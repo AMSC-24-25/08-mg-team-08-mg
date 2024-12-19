@@ -21,6 +21,9 @@ public:
      */
     std::vector<double> solve();
     std::vector<double> solve_iterative();
+
+
+    double determine_error();
     
 
 private:

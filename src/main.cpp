@@ -137,6 +137,9 @@ int main() {
         // Save errors to a file named "parallel_multigrid_errors_level_X.csv"
         std::string filename = "parallel_multigrid_errors_level_" + std::to_string(level) + ".csv";
         save_errors(filename, errors);
+
+        double error = parallelSolver.determine_error();
+        std::cout << "Error for level " << level << ": " << error << "\n";
     }
 
     // Plot all results

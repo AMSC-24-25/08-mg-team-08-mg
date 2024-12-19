@@ -245,3 +245,24 @@ std::vector<double> PoissonSolverParallel::solve_iterative() {
 
     return errors;
 }
+
+double PoissonSolverParallel::determine_error() {
+    double error_L2 = 0.0;
+
+    // Compute errors in parallel
+    #pragma omp parallel for reduction(+:error_L2) collapse(2) num_threads(num_cores)
+    for (int i = 0; i < N - 1; ++i) {
+        for (int j = 0; j < N - 1; ++j) {
+            double diff = u_sol[i][j] - u[i][j];
+            error_L2 += diff * diff;
+        }
+    }
+
+    // Finalize norms
+    double L2_norm = std::sqrt(error_L2);
+
+    // Return one of the metrics if the function needs to return a single value
+    return L2_norm; // For example, returning the L2 norm
+}
+
+

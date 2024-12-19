@@ -7,7 +7,9 @@
 #include <thread> // For hardware_concurrency
 #include "./PoissonSolver.hpp"
 #include "./PoissonSolverParallel.hpp"
-#include "./plot_errors.hpp"
+#include "./plot.hpp"
+
+
 
 
 void save_errors(const std::string &filename, const std::vector<double> &errors) {
@@ -152,6 +154,7 @@ int main() {
     for (size_t i = 0; i < levels.size(); ++i) {
         std::cout << "Level " << levels[i] << "," << seq_duration[i] << "," << par_duration[i] << "\n";
     }
+    plot_times(seq_duration, par_duration, levels);
 
     // Plot all results
     plot_errors(levels);

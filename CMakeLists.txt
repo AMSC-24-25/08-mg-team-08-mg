@@ -16,7 +16,7 @@ find_package(OpenMP REQUIRED)
 set(SOURCES
     src/PoissonSolver.cpp
     src/PoissonSolverParallel.cpp
-    src/plot_errors.cpp
+    src/plot.cpp
     src/main.cpp
 )
 

@@ -1,4 +1,4 @@
-#include "../include/plot_errors.hpp"
+#include "../include/plot.hpp"
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -64,4 +64,53 @@ void plot_errors(std::vector<int> levels) {
     legend();
     save("../data/multigrid_convergence.png");
     std::cout << "Plot saved as 'multigrid_convergence.png'\n";
+}
+
+
+
+void plot_times(const std::vector<double> &seq_duration, const std::vector<double> &par_duration, const std::vector<int> &levels) {
+    // Convert levels (int) to double for plotting
+    std::vector<double> double_levels(levels.begin(), levels.end());
+
+    // Convert levels to string labels
+    std::vector<std::string> labels;
+    for (auto lvl : levels) {
+        labels.push_back(std::to_string(lvl));
+    }
+
+    figure(true);
+    auto ax = gca();
+
+    // Plot the sequential bars
+    auto b1 = bar(double_levels, seq_duration);
+    b1->bar_width(0.4);               // Make the bars narrower
+    b1->display_name("Sequential");   // Label these bars as Sequential
+
+    hold(on);
+
+    // We need to plot the parallel bars shifted a bit to the right
+    // Create a shifted x-axis for parallel bars
+    std::vector<double> shifted_levels = double_levels;
+    for (auto &x : shifted_levels) {
+        x += 0.4; // Shift by the same amount as the width of the first bars
+    }
+
+    auto b2 = bar(shifted_levels, par_duration);
+    b2->bar_width(0.4);
+    b2->display_name("Parallel");     // Label these bars as Parallel
+
+    // Set the x-axis ticks at the original level positions
+    ax->x_axis().tick_values(double_levels);
+    ax->x_axis().ticklabels(labels);
+
+    xlabel("Levels");
+    ylabel("Time Duration (units)");
+    title("Sequential vs Parallel Time Comparison");
+
+    // Show legend
+    legend();
+
+    // Save the figure as PNG (replace with a valid path)
+    save("../data/time_comparison.png");
+    std::cout << "Plot saved as 'time_comparison.png'\n";
 }

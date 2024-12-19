@@ -13,12 +13,10 @@
 ## Overview
 
 This repository contains an implementation of a **2D Poisson Equation Solver** using **Multigrid Methods** combined with the **Jacobi iterative smoothing technique**. It is designed primarily for educational and research purposes in computational science and numerical methods. The solver can handle large grids efficiently and leverages multicore parallelism through OpenMP.
-$$
-\begin{cases}
--\nabla \cdot a \nabla u = f & \text{in } \Omega, \\
-u = g & \text{on } \partial \Omega.
-\end{cases}
-$$
+
+<div align="center">
+    <img src="doc/problem.png" width="300"/>
+</div>
 
 The solution is achieved using a **Multigrid Method**, which accelerates convergence by addressing errors across different scales, combined with the **Jacobi iterative method** for smoothing. The implementation also supports parallelization using OpenMP for improved performance.
 
@@ -113,10 +111,16 @@ If you wish to customize the problem’s parameters (such as grid size, boundary
 ### 3. View Results
 The solver will print its results directly to the console, allowing you to monitor progress as the computation proceeds. Additionally, the solver saves the plot as a png to  for visualization.
 
-<div align="center">
-    <img src="doc/multigrid_convergence.png" alt="Convergence Plot" width="500"/>
-    <img src="doc/time_comparison.png" alt="Time Comparison" width="500"/>
-</div>
+<table>
+  <tr>
+    <td>
+      <img src="doc/multigrid_convergence.png" alt="Convergence Plot" width="600"/>
+    </td>
+    <td>
+      <img src="doc/time_comparison.png" alt="Time Comparison" width="600"/>
+    </td>
+  </tr>
+</table>
 
 
 ## Parallelization

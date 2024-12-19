@@ -24,30 +24,32 @@ double PoissonSolverParallel::forcing_function(double x, double y) const {
 
 void PoissonSolverParallel::initialize() {
     double h = 1.0 / (N - 1);
-    #pragma omp parallel for collapse(2) num_threads(num_cores) // Parallelize with 8 threads
-    for (int i = 0; i < N; ++i) {
-        for (int j = 0; j < N; ++j) {
-            double x = i * h;
-            double y = j * h;
-            rhs[i][j] = forcing_function(x, y);
-            u_sol[i][j] = analytical_solution(x, y);
-        }
-    }
 
-    // Top and Bottom boundary
-    std::vector<int> list = {0, N-1};
-    #pragma omp parallel for num_threads(num_cores)
-    for (int i : list) {
-        for (int j = 0; j < N; ++j) {
-            u[i][j] = u_sol[i][j];
+    #pragma omp parallel num_threads(num_cores)
+    {
+        // Compute rhs and u_sol
+        #pragma omp for collapse(2) schedule(static)
+        for (int i = 0; i < N; ++i) {
+            for (int j = 0; j < N; ++j) {
+                double x = i * h;
+                double y = j * h;
+                rhs[i][j] = forcing_function(x, y);
+                u_sol[i][j] = analytical_solution(x, y);
+            }
         }
-    }
 
-    // Left and Right boundary 
-    #pragma omp parallel for num_threads(num_cores)
-    for (int i : list) {
+        // Top and bottom boundaries
+        #pragma omp for schedule(static)
         for (int j = 0; j < N; ++j) {
-            u[j][i] = u_sol[j][i];
+            u[0][j]    = u_sol[0][j];
+            u[N-1][j]  = u_sol[N-1][j];
+        }
+
+        // Left and right boundaries
+        #pragma omp for schedule(static)
+        for (int i = 0; i < N; ++i) {
+            u[i][0]    = u_sol[i][0];
+            u[i][N-1]  = u_sol[i][N-1];
         }
     }
 }
@@ -56,10 +58,10 @@ void PoissonSolverParallel::initialize() {
 void PoissonSolverParallel::gauss_seidel_smooth(int num_sweeps) {
     double h2_a = (1.0 / (N - 1)) * (1.0 / (N - 1)) / a;
     for (int sweep = 0; sweep < num_sweeps; ++sweep) {
-        #pragma omp parallel for collapse(2) num_threads(num_cores)
+        #pragma omp parallel for collapse(2) schedule(static) num_threads(num_cores)
         for (int i = 1; i < N - 1; ++i) {
             for (int j = 1; j < N - 1; ++j) {
-                u[i][j] = 0.25 * (u[i + 1][j] + u[i - 1][j] + u[i][j + 1] + u[i][j - 1] - h2_a * rhs[i][j]);
+                u[i][j] = 0.25 * (u[i+1][j] + u[i-1][j] + u[i][j+1] + u[i][j-1] - h2_a * rhs[i][j]);
             }
         }
     }
@@ -68,22 +70,17 @@ void PoissonSolverParallel::gauss_seidel_smooth(int num_sweeps) {
 // Jacobi smoother
 void PoissonSolverParallel::jacobi_smooth(int num_sweeps) {
     double h2_a = (1.0 / (N - 1)) * (1.0 / (N - 1)) / a;
-
-    // Temporary storage for updated values
     std::vector<std::vector<double>> u_new(N, std::vector<double>(N, 0.0));
 
     for (int sweep = 0; sweep < num_sweeps; ++sweep) {
-        // init parallel region
-        #pragma omp parallel for schedule(static) num_threads(num_cores)
-
-        // Compute all updated values based on the old grid u
+        #pragma omp parallel for collapse(2) schedule(static) num_threads(num_cores)
         for (int i = 1; i < N - 1; ++i) {
             for (int j = 1; j < N - 1; ++j) {
-                u_new[i][j] = 0.25 * (u[i + 1][j] + u[i - 1][j] + u[i][j + 1] + u[i][j - 1] - h2_a * rhs[i][j]);
+                u_new[i][j] = 0.25 * (u[i+1][j] + u[i-1][j] + u[i][j+1] + u[i][j-1] - h2_a * rhs[i][j]);
             }
         }
 
-        // Copy u_new back into u for the next sweep
+        #pragma omp parallel for collapse(2) schedule(static) num_threads(num_cores)
         for (int i = 1; i < N - 1; ++i) {
             for (int j = 1; j < N - 1; ++j) {
                 u[i][j] = u_new[i][j];
@@ -93,15 +90,15 @@ void PoissonSolverParallel::jacobi_smooth(int num_sweeps) {
 }
 
 // Compute residual
-std::vector<std::vector<double>> PoissonSolverParallel::compute_residual() const{
-    double h2_alpha = (1.0 / (N - 1)) * (1.0 / (N - 1)) / a;
+std::vector<std::vector<double>> PoissonSolverParallel::compute_residual() const {
+    double h2_alpha = (1.0/(N-1))*(1.0/(N-1))/a;
     std::vector<std::vector<double>> residual(N, std::vector<double>(N, 0.0));
-    
-    #pragma omp parallel for schedule(static) num_threads(num_cores)
+
+    #pragma omp parallel for collapse(2) schedule(static) num_threads(num_cores)
     for (int i = 1; i < N - 1; ++i) {
         for (int j = 1; j < N - 1; ++j) {
             residual[i][j] = rhs[i][j] - (
-                a * (u[i + 1][j] + u[i - 1][j] + u[i][j + 1] + u[i][j - 1] - 4 * u[i][j]) / h2_alpha
+                a * (u[i+1][j] + u[i-1][j] + u[i][j+1] + u[i][j-1] - 4 * u[i][j]) / h2_alpha
             );
         }
     }
@@ -109,25 +106,25 @@ std::vector<std::vector<double>> PoissonSolverParallel::compute_residual() const
 }
 
 // Restrict residual to coarser grid
-std::vector<std::vector<double>> PoissonSolverParallel::restrict_residual(const std::vector<std::vector<double>> &fine_grid) const{
-    int coarse_N = (N + 1) / 2;
-    std::vector<std::vector<double>> coarse_grid(coarse_N, std::vector<double>(coarse_N, 0.0));
+std::vector<std::vector<double>> PoissonSolverParallel::restrict_residual(const std::vector<std::vector<double>> &fine_grid) const {
+    int coarse_N = (N+1)/2;
+    std::vector<std::vector<double>> coarse_grid(coarse_N, std::vector<double>(coarse_N,0.0));
 
-    #pragma omp parallel for schedule(static) num_threads(num_cores) 
+    #pragma omp parallel for collapse(2) schedule(static) num_threads(num_cores)
     for (int i = 1; i < coarse_N - 1; ++i) {
         for (int j = 1; j < coarse_N - 1; ++j) {
-            double central = 0.25 * fine_grid[2 * i][2 * j];
+            double central = 0.25 * fine_grid[2*i][2*j];
             double cardinal = 0.125 * (
-                fine_grid[2 * i - 1][2 * j] + 
-                fine_grid[2 * i + 1][2 * j] + 
-                fine_grid[2 * i][2 * j - 1] + 
-                fine_grid[2 * i][2 * j + 1]
+                fine_grid[2*i-1][2*j] +
+                fine_grid[2*i+1][2*j] +
+                fine_grid[2*i][2*j-1] +
+                fine_grid[2*i][2*j+1]
             );
             double diagonal = 0.0625 * (
-                fine_grid[2 * i - 1][2 * j - 1] + 
-                fine_grid[2 * i - 1][2 * j + 1] + 
-                fine_grid[2 * i + 1][2 * j - 1] + 
-                fine_grid[2 * i + 1][2 * j + 1]
+                fine_grid[2*i-1][2*j-1] +
+                fine_grid[2*i-1][2*j+1] +
+                fine_grid[2*i+1][2*j-1] +
+                fine_grid[2*i+1][2*j+1]
             );
             coarse_grid[i][j] = central + cardinal + diagonal;
         }
@@ -137,39 +134,41 @@ std::vector<std::vector<double>> PoissonSolverParallel::restrict_residual(const 
 }
 
 // Prolong correction to finer grid
-std::vector<std::vector<double>> PoissonSolverParallel::prolong_correction(const std::vector<std::vector<double>> &coarse_grid) const{
-    int fine_N = (coarse_grid.size() - 1) * 2 + 1;
-    std::vector<std::vector<double>> padded_grid(fine_N + 2, std::vector<double>(fine_N + 2, 0.0));
+std::vector<std::vector<double>> PoissonSolverParallel::prolong_correction(const std::vector<std::vector<double>> &coarse_grid) const {
+    int fine_N = (int(coarse_grid.size()) - 1) * 2 + 1;
+    std::vector<std::vector<double>> padded_grid(fine_N+2, std::vector<double>(fine_N+2,0.0));
 
-    #pragma omp parallel for schedule(static) num_threads(num_cores)
-    for (int i = 0; i < coarse_grid.size(); ++i) {
-        for (int j = 0; j < coarse_grid[0].size(); ++j) {
+    int coarse_size = (int)coarse_grid.size();
+    int coarse_size_j = (int)coarse_grid[0].size();
+    #pragma omp parallel for collapse(2) schedule(static) num_threads(num_cores)
+    for (int i = 0; i < coarse_size; ++i) {
+        for (int j = 0; j < coarse_size_j; ++j) {
             double val = coarse_grid[i][j];
-            int I = 2 * i + 1; // shifted by +1
-            int J = 2 * j + 1; // shifted by +1
+            int I = 2*i + 1;
+            int J = 2*j + 1;
 
-            // No boundary checks needed, as padding absorbs out-of-range writes
-            padded_grid[I][J]       += val;
-            padded_grid[I-1][J]     += 0.5 * val;
-            padded_grid[I+1][J]     += 0.5 * val;
-            padded_grid[I][J-1]     += 0.5 * val;
-            padded_grid[I][J+1]     += 0.5 * val;
+            padded_grid[I][J] += val;
+            padded_grid[I-1][J] += 0.5*val;
+            padded_grid[I+1][J] += 0.5*val;
+            padded_grid[I][J-1] += 0.5*val;
+            padded_grid[I][J+1] += 0.5*val;
 
-            padded_grid[I-1][J-1]   += 0.25 * val;
-            padded_grid[I-1][J+1]   += 0.25 * val;
-            padded_grid[I+1][J-1]   += 0.25 * val;
-            padded_grid[I+1][J+1]   += 0.25 * val;
+            padded_grid[I-1][J-1] += 0.25*val;
+            padded_grid[I-1][J+1] += 0.25*val;
+            padded_grid[I+1][J-1] += 0.25*val;
+            padded_grid[I+1][J+1] += 0.25*val;
         }
     }
 
-    // Extract the central fine_N x fine_N portion
-    std::vector<std::vector<double>> fine_grid(fine_N, std::vector<double>(fine_N, 0.0));
-    for (int i = 0; i < fine_N; ++i)
-        for (int j = 0; j < fine_N; ++j)
+    std::vector<std::vector<double>> fine_grid(fine_N, std::vector<double>(fine_N,0.0));
+    #pragma omp parallel for collapse(2) schedule(static) num_threads(num_cores)
+    for (int i = 0; i < fine_N; ++i) {
+        for (int j = 0; j < fine_N; ++j) {
             fine_grid[i][j] = padded_grid[i+1][j+1];
+        }
+    }
 
     return fine_grid;
-
 }
 
 // V-cycle

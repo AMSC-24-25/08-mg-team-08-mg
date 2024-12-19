@@ -66,6 +66,9 @@ int main() {
     // Read the levels as a comma-separated string, then parse it into a vector of integers
     std::vector<int> levels = parse_levels(config["levels"]);
 
+    std::vector<double> seq_duration;
+    std::vector<double> par_duration;
+
     //! Point 1
     // Run the plain Iterative solver (sequential)
     std::cout << "Running Iterative Jacobi Solver (No MG)...\n";
@@ -92,6 +95,7 @@ int main() {
         std::vector<double> errors = solver.solve();
         end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> solver_duration = end - start;
+        seq_duration.push_back(solver_duration.count());
 
         std::cout << "Multigrid PoissonSolver (Level " << level << ") execution time: "
                   << solver_duration.count() << " seconds.\n\n";
@@ -131,6 +135,7 @@ int main() {
         std::vector<double> errors = parallelSolver.solve();
         end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> parallel_solver_duration = end - start;
+        par_duration.push_back(parallel_solver_duration.count());
 
         std::cout << "Parallel Multigrid PoissonSolver (Level " << level << ") execution time: "
                   << parallel_solver_duration.count() << " seconds.\n\n";
@@ -141,6 +146,12 @@ int main() {
     }
     double error = parallelSolver.determine_error();
     std::cout << "True error L2-norm of (sol - approx): " << error << "\n";
+
+    // Print the time taken for each level 
+    std::cout << "Level,Sequential Time,Parallel Time\n";
+    for (size_t i = 0; i < levels.size(); ++i) {
+        std::cout << "Level " << levels[i] << "," << seq_duration[i] << "," << par_duration[i] << "\n";
+    }
 
     // Plot all results
     plot_errors(levels);

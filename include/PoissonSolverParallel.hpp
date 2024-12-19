@@ -2,6 +2,7 @@
 #define POISSON_SOLVER_PARALLEL_H
 
 #include <vector>
+#include <string>
 
 class PoissonSolverParallel {
 public:
@@ -13,8 +14,9 @@ public:
      * @param tolerance - Convergence tolerance
      * @param levels - number of levels to coarsen
      * @param num_cores - number of CPU cores to use
+     * @param boundary_path - Path to a file containing boundary values
      */
-    PoissonSolverParallel(int N, double a, int max_iter, double tolerance, int levels, int num_cores);
+    PoissonSolverParallel(int N, double a, int max_iter, double tolerance, int levels, int num_cores, const std::string &boundary_path = "");
     
     /**
      * Solve the Poisson equation using multigrid method
@@ -33,6 +35,7 @@ private:
     double tolerance;          // Convergence tolerance
     int levels;
     int num_cores;             // Number of CPU cores
+    std::string boundary_path;
     std::vector<std::vector<double>> u;   // Solution grid
     std::vector<std::vector<double>> u_sol;   // Solution grid
     std::vector<std::vector<double>> rhs; // Right-hand side (forcing term)

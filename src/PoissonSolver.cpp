@@ -1,12 +1,13 @@
 #include "../include/PoissonSolver.hpp"  
 #include <cmath>            
-#include <iostream>        
+#include <iostream>
+#include <fstream>
 #include <iomanip> 
 using namespace std;
 
 // Constructor
-PoissonSolver::PoissonSolver(int N, double a, int max_iter, double tolerance, int levels)
-    : N(N), a(a), max_iter(max_iter), tolerance(tolerance), levels(levels) {
+PoissonSolver::PoissonSolver(int N, double a, int max_iter, double tolerance, int levels, const std::string &boundary_path)
+    : N(N), a(a), max_iter(max_iter), tolerance(tolerance), levels(levels), boundary_path(boundary_path) {
     u = vector<vector<double>>(N, vector<double>(N, 0.0));
     rhs = vector<vector<double>>(N, vector<double>(N, 0.0));
 }
@@ -22,6 +23,34 @@ double PoissonSolver::forcing_function(double x, double y) const {
 
 void PoissonSolver::initialize() {
     double h = 1.0 / (N - 1);
+
+    // If boundary_path is given, try to read boundary values from file
+    bool use_file_boundary = !boundary_path.empty();
+    std::vector<std::vector<double>> boundary_values;
+
+    if (use_file_boundary) {
+        std::ifstream boundary_file(boundary_path);
+        if (!boundary_file) {
+            std::cerr << "Warning: Cannot open boundary file: " << boundary_path << ". Using analytical boundary.\n";
+            use_file_boundary = false;
+        } else {
+            // expect N lines with N values each
+            boundary_values.resize(N, std::vector<double>(N, 0.0));
+            for (int i = 0; i < N; ++i) {
+                for (int j = 0; j < N; ++j) {
+                    if (!(boundary_file >> boundary_values[i][j])) {
+                        std::cerr << "Error reading boundary value at (" << i << "," << j << "). Using analytical boundary.\n";
+                        use_file_boundary = false;
+                        break;
+                    }
+                }
+                if (!use_file_boundary) break;
+            }
+            boundary_file.close();
+        }
+    }
+
+
     for (int i = 0; i < N; ++i) {
         double x = i * h;
         for (int j = 0; j < N; ++j) {

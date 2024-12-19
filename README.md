@@ -106,7 +106,9 @@ If you wish to customize the problem’s parameters (such as grid size, boundary
 **Steps to modify parameters:**
 1. Open `\data\config.txt` .
 2. Change the values of parameters like grid size `N`, constant `a`, or `max_iter`.
-3. Rebuild the solver to apply the changes.
+3. Modify forcing_function to the desired problem to solve
+4. If the boundary_path is not provided in config, it will use the analytical_function present in the code.
+5. Rebuild the solver to apply the changes.
 
 ### 3. View Results
 The solver will print its results directly to the console, allowing you to monitor progress as the computation proceeds. Additionally, the solver saves the plot as a png to  for visualization.

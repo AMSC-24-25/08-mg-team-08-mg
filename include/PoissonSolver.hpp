@@ -2,6 +2,7 @@
 #define POISSON_SOLVER_H
 
 #include <vector>
+#include <string>
 
 class PoissonSolver {
 public:
@@ -12,8 +13,9 @@ public:
      * @param max_iter - Maximum number of iterations
      * @param tolerance - Convergence tolerance
      * @param levels - number of levels to coarsen
+     * @param boundary_path - Path to a file containing boundary values
      */
-    PoissonSolver(int N, double a, int max_iter, double tolerance, int levels);
+    PoissonSolver(int N, double a, int max_iter, double tolerance, int levels, const std::string &boundary_path = "");
     
     /**
      * Solve the Poisson equation
@@ -27,6 +29,7 @@ private:
     int max_iter;              // Maximum number of iterations
     double tolerance;          // Convergence tolerance
     int levels;
+    std::string boundary_path;
     std::vector<std::vector<double>> u;   // Solution grid
     std::vector<std::vector<double>> rhs; // Right-hand side (forcing term)
 

@@ -61,6 +61,7 @@ int main() {
     double a = std::stod(config["a"]);
     int max_iter = std::stoi(config["max_iter"]);
     double tolerance = std::stod(config["tolerance"]);
+    std::string boundary_path = config["boundary_path"];
 
     // Read the levels as a comma-separated string, then parse it into a vector of integers
     std::vector<int> levels = parse_levels(config["levels"]);
@@ -68,7 +69,7 @@ int main() {
     //! Point 1
     // Run the plain Iterative solver (sequential)
     std::cout << "Running Iterative Jacobi Solver (No MG)...\n";
-    PoissonSolver plainSolver(N, a, max_iter, tolerance, 1);
+    PoissonSolver plainSolver(N, a, max_iter, tolerance, 1, boundary_path);
 
     // Measure execution time for sequential iterative solver
     auto start = std::chrono::high_resolution_clock::now();
@@ -77,14 +78,14 @@ int main() {
     std::chrono::duration<double> plain_duration = end - start;
 
     std::cout << "Iterative Jacobi Solver execution time: " 
-              << plain_duration.count() << " seconds.\n";
+              << plain_duration.count() << " seconds.\n\n";
 
     save_errors("plain_errors.csv", plain_errors);
 
     // Run the multigrid solver (sequential) for different levels
     for (int level : levels) {
         std::cout << "Running Multigrid PoissonSolver with levels = " << level << "...\n";
-        PoissonSolver solver(N, a, max_iter, tolerance, level);
+        PoissonSolver solver(N, a, max_iter, tolerance, level, boundary_path);
 
         // Measure execution time for sequential multigrid solver
         start = std::chrono::high_resolution_clock::now();
@@ -93,7 +94,7 @@ int main() {
         std::chrono::duration<double> solver_duration = end - start;
 
         std::cout << "Multigrid PoissonSolver (Level " << level << ") execution time: "
-                  << solver_duration.count() << " seconds.\n";
+                  << solver_duration.count() << " seconds.\n\n";
 
         // Save errors to a file named "multigrid_errors_level_X.csv"
         std::string filename = "multigrid_errors_level_" + std::to_string(level) + ".csv";
@@ -107,7 +108,7 @@ int main() {
     
     // Run the parallel solver (PoissonSolverParallel)
     std::cout << "Running Parallel PoissonSolver...\n";
-    PoissonSolverParallel parallelSolver(N, a, max_iter, tolerance, 1, num_cores);
+    PoissonSolverParallel parallelSolver(N, a, max_iter, tolerance, 1, num_cores, boundary_path);
 
     // Measure execution time for parallel solver
     start = std::chrono::high_resolution_clock::now();
@@ -116,14 +117,14 @@ int main() {
     std::chrono::duration<double> parallel_duration = end - start;
 
     std::cout << "Parallel PoissonSolver execution time: " 
-              << parallel_duration.count() << " seconds.\n";
+              << parallel_duration.count() << " seconds.\n\n";
 
     save_errors("parallel_errors.csv", parallel_errors);
 
     // Run the parallel multigrid solver for different levels
     for (int level : levels) {
         std::cout << "Running Parallel Multigrid PoissonSolver with levels = " << level << "...\n";
-        PoissonSolverParallel parallelSolver(N, a, max_iter, tolerance, level, num_cores);
+        PoissonSolverParallel parallelSolver(N, a, max_iter, tolerance, level, num_cores, boundary_path);
 
         // Measure execution time for parallel multigrid solver
         start = std::chrono::high_resolution_clock::now();
@@ -132,15 +133,14 @@ int main() {
         std::chrono::duration<double> parallel_solver_duration = end - start;
 
         std::cout << "Parallel Multigrid PoissonSolver (Level " << level << ") execution time: "
-                  << parallel_solver_duration.count() << " seconds.\n";
+                  << parallel_solver_duration.count() << " seconds.\n\n";
 
         // Save errors to a file named "parallel_multigrid_errors_level_X.csv"
         std::string filename = "parallel_multigrid_errors_level_" + std::to_string(level) + ".csv";
         save_errors(filename, errors);
-
-        double error = parallelSolver.determine_error();
-        std::cout << "Error for level " << level << ": " << error << "\n";
     }
+    double error = parallelSolver.determine_error();
+    std::cout << "True error L2-norm of (sol - approx): " << error << "\n";
 
     // Plot all results
     plot_errors(levels);

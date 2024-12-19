@@ -2,12 +2,13 @@
 #include <cmath>
 #include <iostream>
 #include <iomanip>
+#include <fstream>
 #include <omp.h>
 
 
 /// Constructor
-PoissonSolverParallel::PoissonSolverParallel(int N, double a, int max_iter, double tolerance, int levels, int num_cores)
-    : N(N), a(a), max_iter(max_iter), tolerance(tolerance), levels(levels), num_cores(8) {
+PoissonSolverParallel::PoissonSolverParallel(int N, double a, int max_iter, double tolerance, int levels, int num_cores, const std::string &boundary_path)
+    : N(N), a(a), max_iter(max_iter), tolerance(tolerance), levels(levels), num_cores(8), boundary_path(boundary_path) {
     u = std::vector<std::vector<double>>(N, std::vector<double>(N, 0.0));
     u_sol = std::vector<std::vector<double>>(N, std::vector<double>(N, 0.0));
     rhs = std::vector<std::vector<double>>(N, std::vector<double>(N, 0.0));
@@ -24,6 +25,32 @@ double PoissonSolverParallel::forcing_function(double x, double y) const {
 
 void PoissonSolverParallel::initialize() {
     double h = 1.0 / (N - 1);
+
+    // If boundary_path is given, try to read boundary values from file
+    bool use_file_boundary = !boundary_path.empty();
+    std::vector<std::vector<double>> boundary_values;
+
+    if (use_file_boundary) {
+        std::ifstream boundary_file(boundary_path);
+        if (!boundary_file) {
+            std::cerr << "Warning: Cannot open boundary file: " << boundary_path << ". Using analytical boundary.\n";
+            use_file_boundary = false;
+        } else {
+            // expect N lines with N values each
+            boundary_values.resize(N, std::vector<double>(N, 0.0));
+            for (int i = 0; i < N; ++i) {
+                for (int j = 0; j < N; ++j) {
+                    if (!(boundary_file >> boundary_values[i][j])) {
+                        std::cerr << "Error reading boundary value at (" << i << "," << j << "). Using analytical boundary.\n";
+                        use_file_boundary = false;
+                        break;
+                    }
+                }
+                if (!use_file_boundary) break;
+            }
+            boundary_file.close();
+        }
+    }
 
     #pragma omp parallel num_threads(num_cores)
     {

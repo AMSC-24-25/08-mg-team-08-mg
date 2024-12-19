@@ -31,6 +31,7 @@ private:
     int levels;
     int num_cores;             // Number of CPU cores
     std::vector<std::vector<double>> u;   // Solution grid
+    std::vector<std::vector<double>> u_sol;   // Solution grid
     std::vector<std::vector<double>> rhs; // Right-hand side (forcing term)
 
     /**

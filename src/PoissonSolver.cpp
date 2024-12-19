@@ -34,18 +34,6 @@ void PoissonSolver::initialize() {
     }
 }
 
-// Gauss-Seidel smoother
-void PoissonSolver::gauss_seidel_smooth(int num_sweeps) {
-    double h2_a = (1.0 / (N - 1)) * (1.0 / (N - 1)) / a;
-    for (int sweep = 0; sweep < num_sweeps; ++sweep) {
-        for (int i = 1; i < N - 1; ++i) {
-            for (int j = 1; j < N - 1; ++j) {
-                u[i][j] = 0.25 * (u[i + 1][j] + u[i - 1][j] + u[i][j + 1] + u[i][j - 1] - h2_a * rhs[i][j]);
-            }
-        }
-    }
-}
-
 // Jacobi smoother
 void PoissonSolver::jacobi_smooth(int num_sweeps) {
     double h2_a = (1.0 / (N - 1)) * (1.0 / (N - 1)) / a;
@@ -149,7 +137,6 @@ vector<vector<double>> PoissonSolver::prolong_correction(const vector<vector<dou
 void PoissonSolver::v_cycle(int level, std::vector<std::vector<double>> &u_level, 
                                       std::vector<std::vector<double>> &rhs_level, int num_levels) {
     // Pre-smoothing
-    // gauss_seidel_smooth(5);
     jacobi_smooth(5);
 
     if (level < num_levels - 1) {
@@ -176,7 +163,6 @@ void PoissonSolver::v_cycle(int level, std::vector<std::vector<double>> &u_level
     }
 
     // Post-smoothing
-    //gauss_seidel_smooth(5);
     jacobi_smooth(5);
 }
 
@@ -220,8 +206,8 @@ vector<double> PoissonSolver::solve_iterative() {
     vector<double> errors;
 
     while (iter < max_iter && error > tolerance) {
-        // Perform one full Gauss-Seidel sweep
-        gauss_seidel_smooth(1);
+        // Perform one iterative sweep
+        jacobi_smooth(1);
 
         // Compute residual and error
         auto residual = compute_residual();

@@ -57,12 +57,6 @@ private:
     double forcing_function(double x, double y) const;
 
     /**
-     * Perform parallel Gauss-Seidel smoothing
-     * @param num_sweeps - Number of smoothing iterations
-     */
-    void gauss_seidel_smooth(int num_sweeps);
-
-    /**
      * Perform parallel Jacobi smoothing
      * @param num_sweeps - Number of smoothing iterations
      */

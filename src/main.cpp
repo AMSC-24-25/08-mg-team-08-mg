@@ -66,17 +66,17 @@ int main() {
     std::vector<int> levels = parse_levels(config["levels"]);
 
     //! Point 1
-    // Run the plain Gauss-Seidel solver (sequential)
-    std::cout << "Running Plain Gauss-Seidel Solver (No MG)...\n";
+    // Run the plain Iterative solver (sequential)
+    std::cout << "Running Iterative Jacobi Solver (No MG)...\n";
     PoissonSolver plainSolver(N, a, max_iter, tolerance, 1);
 
-    // Measure execution time for sequential solver
+    // Measure execution time for sequential iterative solver
     auto start = std::chrono::high_resolution_clock::now();
     std::vector<double> plain_errors = plainSolver.solve_iterative();
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> plain_duration = end - start;
 
-    std::cout << "Plain Gauss-Seidel Solver execution time: " 
+    std::cout << "Iterative Jacobi Solver execution time: " 
               << plain_duration.count() << " seconds.\n";
 
     save_errors("plain_errors.csv", plain_errors);

@@ -115,6 +115,7 @@ The solver will print its results directly to the console, allowing you to monit
 
 <div align="center">
     <img src="doc/multigrid_convergence.png" alt="Convergence Plot" width="500"/>
+    <img src="doc/time_comparison.png" alt="Time Comparison" width="500"/>
 </div>
 
 

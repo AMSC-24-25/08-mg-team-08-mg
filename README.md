@@ -1,13 +1,5 @@
 # Multigrid 2D Poisson Solver
 
-This repository contains a high-performance implementation of a **2D Poisson Equation Solver** using **Multigrid Methods** combined with the **Gauss-Seidel iterative smoothing technique**. The solver is designed for computational efficiency and supports parallel execution using OpenMP, making it suitable for large-scale numerical simulations.
-
-<div align="center">
-    <img src="doc/multigrid_convergence.png" alt="Convergence Plot" width="500"/>
-</div>
-
----
-
 ## Table of Contents
 - [Overview](#overview)
 - [Mathematical Formulation](#mathematical-formulation)
@@ -20,8 +12,7 @@ This repository contains a high-performance implementation of a **2D Poisson Equ
 
 ## Overview
 
-This project provides a scalable and efficient 2D Poisson equation solver using Multigrid Methods combined with Gauss-Seidel smoothing. It is designed primarily for educational and research purposes in computational science and numerical methods. The solver can handle large grids efficiently and leverages multicore parallelism through OpenMP.
-
+This repository contains an implementation of a **2D Poisson Equation Solver** using **Multigrid Methods** combined with the **Jacobi iterative smoothing technique**. It is designed primarily for educational and research purposes in computational science and numerical methods. The solver can handle large grids efficiently and leverages multicore parallelism through OpenMP.
 $$
 \begin{cases}
 -\nabla \cdot a \nabla u = f & \text{in } \Omega, \\
@@ -29,7 +20,7 @@ u = g & \text{on } \partial \Omega.
 \end{cases}
 $$
 
-The solution is achieved using a **Multigrid Method**, which accelerates convergence by addressing errors across different scales, combined with the **Gauss-Seidel iterative method** for smoothing. The implementation also supports parallelization using OpenMP for improved performance.
+The solution is achieved using a **Multigrid Method**, which accelerates convergence by addressing errors across different scales, combined with the **Jacobi iterative method** for smoothing. The implementation also supports parallelization using OpenMP for improved performance.
 
 ---
 
@@ -56,9 +47,9 @@ $$
 ## Features
 
 - **Multigrid V-Cycle:** Rapidly reduces both high- and low-frequency errors, accelerating convergence compared to classical iterative methods.
-- **Gauss-Seidel Smoothing:** Simple yet effective iterative method that eliminates high-frequency error components.
+- **Jacobi Smoothing:** Simple yet effective iterative method that eliminates high-frequency error components.
 - **OpenMP Parallelization:** Distributes work across multiple CPU cores, enabling faster solves on large grids.
-- **Flexible Boundary Conditions & Parameters:** Easily modify problem setups, grid sizes, and iteration counts.
+- **Flexible Parameters:** Easily modify problem setups, grid sizes, and iteration counts.
 - **Visual Outputs:** Generate convergence plots to diagnose and visualize solver performance.
 
 ---
@@ -118,21 +109,12 @@ If you wish to customize the problem’s parameters (such as grid size, boundary
 3. Rebuild the solver to apply the changes.
 
 ### 3. View Results
-The solver will print its results directly to the console, allowing you to monitor progress as the computation proceeds. Additionally, the solver saves the plot to ... for visualization.
+The solver will print its results directly to the console, allowing you to monitor progress as the computation proceeds. Additionally, the solver saves the plot as a png to  for visualization.
+
+<div align="center">
+    <img src="doc/multigrid_convergence.png" alt="Convergence Plot" width="500"/>
+</div>
+
 
 ## Parallelization
-The code uses OpenMP to distribute computations across multiple threads, enhancing performance for large problems. The default number of threads is set to 8. Modify the OMP_NUM_THREADS environment variable to adjust it.
-
-Here’s how parallelization is achieved:
-
-### 1. Grid initialization: 
-Parallelized using #pragma omp parallel for collapse(2) to compute initial conditions for each grid point.
-
-### 2. Residual computation
-Residuals for each grid point are computed in parallel, with a reduction applied for accurate error summation.
-
-### 3. Grid transformations
-Restriction and Prolongation are parallelized to speedup the program.
-
-### 4. Iterative method smoothing
-...
+The code uses OpenMP to distribute computations across multiple threads, enhancing performance for large problems. The default number of threads is set to the number of cores of the machine.

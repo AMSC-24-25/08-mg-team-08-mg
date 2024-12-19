@@ -62,6 +62,12 @@ private:
     void gauss_seidel_smooth(int num_sweeps);
 
     /**
+     * Perform parallel Jacobi smoothing
+     * @param num_sweeps - Number of smoothing iterations
+     */
+    void jacobi_smooth(int num_sweeps);
+
+    /**
      * Compute the residual of the current solution
      * @return Residual grid
      */

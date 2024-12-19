@@ -52,12 +52,39 @@ void PoissonSolverParallel::gauss_seidel_smooth(int num_sweeps) {
     }
 }
 
+// Jacobi smoother
+void PoissonSolverParallel::jacobi_smooth(int num_sweeps) {
+    double h2_a = (1.0 / (N - 1)) * (1.0 / (N - 1)) / a;
+
+    // Temporary storage for updated values
+    std::vector<std::vector<double>> u_new(N, std::vector<double>(N, 0.0));
+
+    for (int sweep = 0; sweep < num_sweeps; ++sweep) {
+        // init parallel region
+        #pragma omp parallel for schedule(static) num_threads(num_cores)
+
+        // Compute all updated values based on the old grid u
+        for (int i = 1; i < N - 1; ++i) {
+            for (int j = 1; j < N - 1; ++j) {
+                u_new[i][j] = 0.25 * (u[i + 1][j] + u[i - 1][j] + u[i][j + 1] + u[i][j - 1] - h2_a * rhs[i][j]);
+            }
+        }
+
+        // Copy u_new back into u for the next sweep
+        for (int i = 1; i < N - 1; ++i) {
+            for (int j = 1; j < N - 1; ++j) {
+                u[i][j] = u_new[i][j];
+            }
+        }
+    }
+}
+
 // Compute residual
 std::vector<std::vector<double>> PoissonSolverParallel::compute_residual() const{
     double h2_alpha = (1.0 / (N - 1)) * (1.0 / (N - 1)) / a;
     std::vector<std::vector<double>> residual(N, std::vector<double>(N, 0.0));
     
-    #pragma omp parallel for collapse(2) num_threads(num_cores) // Parallelize with 8 threads
+    #pragma omp parallel for schedule(static) num_threads(num_cores)
     for (int i = 1; i < N - 1; ++i) {
         for (int j = 1; j < N - 1; ++j) {
             residual[i][j] = rhs[i][j] - (
@@ -73,7 +100,7 @@ std::vector<std::vector<double>> PoissonSolverParallel::restrict_residual(const 
     int coarse_N = (N + 1) / 2;
     std::vector<std::vector<double>> coarse_grid(coarse_N, std::vector<double>(coarse_N, 0.0));
 
-    #pragma omp parallel for collapse(2) num_threads(num_cores) // Parallelize with 8 threads
+    #pragma omp parallel for schedule(static) num_threads(num_cores) 
     for (int i = 1; i < coarse_N - 1; ++i) {
         for (int j = 1; j < coarse_N - 1; ++j) {
             double central = 0.25 * fine_grid[2 * i][2 * j];
@@ -101,7 +128,7 @@ std::vector<std::vector<double>> PoissonSolverParallel::prolong_correction(const
     int fine_N = (coarse_grid.size() - 1) * 2 + 1;
     std::vector<std::vector<double>> padded_grid(fine_N + 2, std::vector<double>(fine_N + 2, 0.0));
 
-    #pragma omp parallel for collapse(2) num_threads(num_cores)
+    #pragma omp parallel for schedule(static) num_threads(num_cores)
     for (int i = 0; i < coarse_grid.size(); ++i) {
         for (int j = 0; j < coarse_grid[0].size(); ++j) {
             double val = coarse_grid[i][j];
@@ -135,7 +162,8 @@ std::vector<std::vector<double>> PoissonSolverParallel::prolong_correction(const
 // V-cycle
 void PoissonSolverParallel::v_cycle(int level, std::vector<std::vector<double>> &u_level, 
                                       std::vector<std::vector<double>> &rhs_level, int num_levels) {
-    gauss_seidel_smooth(5);
+    //gauss_seidel_smooth(5);
+    jacobi_smooth(5);
 
     if (level < num_levels - 1) {
         auto residual = compute_residual();
@@ -144,14 +172,16 @@ void PoissonSolverParallel::v_cycle(int level, std::vector<std::vector<double>> 
         std::vector<std::vector<double>> coarse_u(coarse_N, std::vector<double>(coarse_N, 0.0));
         v_cycle(level + 1, coarse_u, coarse_residual, num_levels);
         auto correction = prolong_correction(coarse_u);
-        #pragma omp parallel for collapse(2) num_threads(num_cores)
+
+        #pragma omp parallel for schedule(static) num_threads(num_cores)
         for (int i = 1; i < u_level.size() - 1; ++i) {
             for (int j = 1; j < u_level.size() - 1; ++j) {
                 u_level[i][j] += correction[i][j];
             }
         }
     }
-    gauss_seidel_smooth(5);
+    //gauss_seidel_smooth(5);
+    jacobi_smooth(5);
 }
 
 // Solve using multigrid

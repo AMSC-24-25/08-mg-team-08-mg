@@ -31,12 +31,7 @@ std::unordered_map<std::string, std::string> read_config(const std::string &file
             std::istringstream iss(line);
             std::string key, value;
             if (std::getline(iss, key, '=') && std::getline(iss, value)) {
-                // Special handling for levels (comma-separated values)
-                if (key == "levels") {
-                    config[key] = value; // Store the string "1,3,5,7"
-                } else {
-                    config[key] = value; // Store other key-value pairs
-                }
+                config[key] = value;
             }
         }
         file.close();

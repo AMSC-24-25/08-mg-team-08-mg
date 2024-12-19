@@ -94,12 +94,14 @@ void PoissonSolverParallel::jacobi_smooth(int num_sweeps) {
             }
         }
 
-        #pragma omp parallel for collapse(2) schedule(static) num_threads(num_cores)
-        for (int i = 1; i < N - 1; ++i) {
-            for (int j = 1; j < N - 1; ++j) {
-                u[i][j] = u_new[i][j];
-            }
-        }
+        // #pragma omp parallel for collapse(2) schedule(static) num_threads(num_cores)
+        // for (int i = 1; i < N - 1; ++i) {
+        //     for (int j = 1; j < N - 1; ++j) {
+        //         u[i][j] = u_new[i][j];
+        //     }
+        // }
+        u.swap(u_new);
+        
     }
 }
 

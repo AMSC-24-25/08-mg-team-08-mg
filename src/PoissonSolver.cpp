@@ -79,11 +79,12 @@ void PoissonSolver::jacobi_smooth(int num_sweeps) {
         }
 
         // Copy u_new back into u for the next sweep
-        for (int i = 1; i < N - 1; ++i) {
-            for (int j = 1; j < N - 1; ++j) {
-                u[i][j] = u_new[i][j];
-            }
-        }
+        // for (int i = 1; i < N - 1; ++i) {
+        //     for (int j = 1; j < N - 1; ++j) {
+        //         u[i][j] = u_new[i][j];
+        //     }
+        // }
+        u.swap(u_new);
     }
 }
 

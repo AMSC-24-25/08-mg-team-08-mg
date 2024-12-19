@@ -104,7 +104,7 @@ void plot_times(const std::vector<double> &seq_duration, const std::vector<doubl
     ax->x_axis().ticklabels(labels);
 
     xlabel("Levels");
-    ylabel("Time Duration (units)");
+    ylabel("Time Duration (seconds)");
     title("Sequential vs Parallel Time Comparison");
 
     // Show legend

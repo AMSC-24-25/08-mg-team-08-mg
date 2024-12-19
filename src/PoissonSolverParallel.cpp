@@ -99,25 +99,37 @@ std::vector<std::vector<double>> PoissonSolverParallel::restrict_residual(const 
 // Prolong correction to finer grid
 std::vector<std::vector<double>> PoissonSolverParallel::prolong_correction(const std::vector<std::vector<double>> &coarse_grid) const{
     int fine_N = (coarse_grid.size() - 1) * 2 + 1;
-    std::vector<std::vector<double>> fine_grid(fine_N, std::vector<double>(fine_N, 0.0));
+    std::vector<std::vector<double>> padded_grid(fine_N + 2, std::vector<double>(fine_N + 2, 0.0));
 
-    #pragma omp parallel for collapse(2) num_threads(num_cores) // Parallelize with 8 threads
+    #pragma omp parallel for collapse(2) num_threads(num_cores)
     for (int i = 0; i < coarse_grid.size(); ++i) {
         for (int j = 0; j < coarse_grid[0].size(); ++j) {
-            fine_grid[2 * i][2 * j] += coarse_grid[i][j];
-            // a lot of ifs and some of them could be nested. remember that if are costly, they do not come for free.
-            if (2 * i - 1 >= 0) fine_grid[2 * i - 1][2 * j] += 0.5 * coarse_grid[i][j];
-            if (2 * i + 1 < fine_N) fine_grid[2 * i + 1][2 * j] += 0.5 * coarse_grid[i][j];
-            if (2 * j - 1 >= 0) fine_grid[2 * i][2 * j - 1] += 0.5 * coarse_grid[i][j];
-            if (2 * j + 1 < fine_N) fine_grid[2 * i][2 * j + 1] += 0.5 * coarse_grid[i][j];
-            if (2 * i - 1 >= 0 && 2 * j - 1 >= 0) fine_grid[2 * i - 1][2 * j - 1] += 0.25 * coarse_grid[i][j];
-            if (2 * i - 1 >= 0 && 2 * j + 1 < fine_N) fine_grid[2 * i - 1][2 * j + 1] += 0.25 * coarse_grid[i][j];
-            if (2 * i + 1 < fine_N && 2 * j - 1 >= 0) fine_grid[2 * i + 1][2 * j - 1] += 0.25 * coarse_grid[i][j];
-            if (2 * i + 1 < fine_N && 2 * j + 1 < fine_N) fine_grid[2 * i + 1][2 * j + 1] += 0.25 * coarse_grid[i][j];
+            double val = coarse_grid[i][j];
+            int I = 2 * i + 1; // shifted by +1
+            int J = 2 * j + 1; // shifted by +1
+
+            // No boundary checks needed, as padding absorbs out-of-range writes
+            padded_grid[I][J]       += val;
+            padded_grid[I-1][J]     += 0.5 * val;
+            padded_grid[I+1][J]     += 0.5 * val;
+            padded_grid[I][J-1]     += 0.5 * val;
+            padded_grid[I][J+1]     += 0.5 * val;
+
+            padded_grid[I-1][J-1]   += 0.25 * val;
+            padded_grid[I-1][J+1]   += 0.25 * val;
+            padded_grid[I+1][J-1]   += 0.25 * val;
+            padded_grid[I+1][J+1]   += 0.25 * val;
         }
     }
 
+    // Extract the central fine_N x fine_N portion
+    std::vector<std::vector<double>> fine_grid(fine_N, std::vector<double>(fine_N, 0.0));
+    for (int i = 0; i < fine_N; ++i)
+        for (int j = 0; j < fine_N; ++j)
+            fine_grid[i][j] = padded_grid[i+1][j+1];
+
     return fine_grid;
+
 }
 
 // V-cycle

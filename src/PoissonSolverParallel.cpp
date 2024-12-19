@@ -7,8 +7,9 @@
 
 /// Constructor
 PoissonSolverParallel::PoissonSolverParallel(int N, double a, int max_iter, double tolerance, int levels, int num_cores)
-    : N(N), a(a), max_iter(max_iter), tolerance(tolerance), levels(levels), num_cores(num_cores) {
+    : N(N), a(a), max_iter(max_iter), tolerance(tolerance), levels(levels), num_cores(8) {
     u = std::vector<std::vector<double>>(N, std::vector<double>(N, 0.0));
+    u_sol = std::vector<std::vector<double>>(N, std::vector<double>(N, 0.0));
     rhs = std::vector<std::vector<double>>(N, std::vector<double>(N, 0.0));
 }
 
@@ -29,12 +30,24 @@ void PoissonSolverParallel::initialize() {
             double x = i * h;
             double y = j * h;
             rhs[i][j] = forcing_function(x, y);
+            u_sol[i][j] = analytical_solution(x, y);
+        }
+    }
 
-            // in general you do not have an analytical solution. So it is better to leave the
-            // treatment of a possible analytical solution as an optional thing.
-            if (i == 0 || i == N - 1 || j == 0 || j == N - 1) {
-                u[i][j] = analytical_solution(x, y);
-            }
+    // Top and Bottom boundary
+    std::vector<int> list = {0, N-1};
+    #pragma omp parallel for num_threads(num_cores)
+    for (int i : list) {
+        for (int j = 0; j < N; ++j) {
+            u[i][j] = u_sol[i][j];
+        }
+    }
+
+    // Left and Right boundary 
+    #pragma omp parallel for num_threads(num_cores)
+    for (int i : list) {
+        for (int j = 0; j < N; ++j) {
+            u[j][i] = u_sol[j][i];
         }
     }
 }

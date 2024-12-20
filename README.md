@@ -31,13 +31,22 @@ Assuming:
 The Laplacian is approximated as:
 
 $$
-\nabla^2 u \approx \frac{u_{i+1,j} + u_{i-1,j} + u_{i,j+1} + u_{i,j-1} - 4u_{i,j}}{h^2}.
+\nabla^2 u \approx \frac{u_{i+1,j} + u_{i-1,j} + u_{i,j+1} + u_{i,j-1} - 4u_{i,j}}{h^2}
 $$
 
-Substituting into the Poisson equation, the iterative update formula becomes:
+Substituting into the Poisson equation:
 
 $$
-u_{i,j} = \frac{1}{4} \left(u_{i+1,j} + u_{i-1,j} + u_{i,j+1} + u_{i,j-1} - \frac{h^2}{a} f_{i,j}\right).
+-\frac{a}{h^2} \left(u_{i+1,j} + u_{i-1,j} + u_{i,j+1} + u_{i,j-1} - 4u_{i,j}\right) = f_{i,j} 
+$$
+
+$$
+u_{i,j} = \frac{1}{4} \left(u_{i+1,j} + u_{i-1,j} + u_{i,j+1} + u_{i,j-1} - \frac{h^2}{a} f_{i,j}\right)
+$$
+
+Jacobi iterative update formula!
+$$
+u_{i,j}^{n+1} = \frac{1}{4} \left(u_{i+1,j}^n + u_{i-1,j}^n + u_{i,j+1}^n + u_{i,j-1}^n - \frac{h^2}{a} f_{i,j}\right)
 $$
 
 ---

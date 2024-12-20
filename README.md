@@ -1,4 +1,4 @@
-# Multigrid 2D Poisson Solver
+# Multigrid 2D Poisson Equation Solver
 
 ## Table of Contents
 - [Overview](#overview)
